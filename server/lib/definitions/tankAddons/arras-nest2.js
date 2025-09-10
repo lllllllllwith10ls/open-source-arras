@@ -2,201 +2,12 @@ const { basePolygonDamage, basePolygonHealth, base } = require('../constants.js'
 const { combineStats, skillSet, menu, makeRare, weaponArray, makeTurret } = require('../facilitators.js')
 const g = require('../gunvals.js');
 
-let EventEmitter = require('events');
 
-
-let ticker = {
-    tickIndex : 0,
-    tickEvents : new EventEmitter(),
-    syncedDelaysLoop : () => tickEvents.emit(tickIndex++),
-    setSyncedTimeout : (callback, ticks = 0, ...args) => tickEvents.once(tickIndex + Math.round(ticks), () => callback(...args))
-}
-
-
-
-Config.NEST_TYPE_NAMES = ["pentagons", "hexagons", "heptagons"];
-Config.NEST_CHANCES = [[5, 0], [ 4, 1], [ 3, 2]]
 
 
 Class.nest2 = menu("Nest 2.0")
 Class.nest2.UPGRADES_TIER_0 = ['patrollerRocket','patrollerTrap', 'patrollerGunner', 'impedanceDestroyer', 'impedanceTriple', 'barracksTrapper', 'soldierTrapper', 'barracksAuto', 'soldierAuto'] ;
 Class.addons.UPGRADES_TIER_0.push("nest2");
-
-Config.NEST_TYPE = 1;
-
-function changeNestFoodType(gameManager) {
-  let setting = 0;
-  
-  setting=pickFromChanceSet(Config.NEST_CHANCES);
-  if(setting != gameManager.gameSettings.NEST_TYPE) {
-    gameManager.socketManager.broadcast("The nest is being overtaken by " + Config.NEST_TYPE_NAMES[setting] + "!");
-    setSyncedTimeout(()=> changeNestFoodType2(setting, gameManager), 150);
-  } else {
-    setSyncedTimeout(()=>changeNestFoodType(gameManager), (ran.irandom(360) + 240)*100); // 6000
-  }
-}
-
-Events.on('start', ({ gameManager }) => ticker.setSyncedTimeout(() => changeNestFoodType2(Config.NEST_TYPE, gameManager), 10));
-Events.on('quickloop', ({ }) => ticker.syncedDelaysLoop());
-
-function changeNestFoodType2(setting, gameManager) {
-  
-    gameManager.gameSettings.NEST_TYPE = setting;
-    gameManager.gameSettings.CURRENT_COLOR = Config.NEST_COLORS[setting];
-    gameManager.gameSettings.ENEMY_CAP_NEST = Config.ENEMY_CAP_NEST[setting];
-    gameManager.gameSettings.ENEMY_TYPES_NEST = Config.ENEMY_TYPES_NESTS[setting];
-    gameManager.gameSettings.FOOD_CAP_NEST = Config.FOOD_CAP_NEST[setting];
-    gameManager.gameSettings.FOOD_TYPES_NEST = Config.FOOD_TYPES_NESTS[setting];
-    for(let i = 0; i < nestTiles.length; i++) {
-        nestTiles[i].color = gameManager.gameSettings.CURRENT_COLOR;
-    }
-    gameManager.socketManager.broadcastRoom();
-
-    setSyncedTimeout(()=>changeNestFoodType(gameManager), (Math.random() * 360 + 240)*100); // 300000
-}
-
-Config.FOOD_TYPES_NEST = [
-    [1, [
-        [16, 'pentagon'], [ 4, 'betaPentagon'], [ 1, 'alphaPentagon']
-    ]]
-];
-Config.FOOD_TYPES_NEST_2 = [
-    [1, [
-        [36, 'hexagon'], [ 6, 'betaHexagon'], [ 1, 'alphaHexagon']
-    ]]
-];
-
-Config.FOOD_TYPES_NEST_3 = [
-    [1, [
-        [49, 'heptagon'], [ 7, 'betaHeptagon'], [ 1, 'alphaHeptagon']
-    ]]
-];
-
-Config.ENEMY_TYPES_NEST = [
-    [19, [
-        [1, 'crasher']
-    ]],
-    [1, [
-        [1, 'sentryGun'], [1, 'sentrySwarm'], [1, 'sentryTrap']
-    ]]
-];
-
-Config.ENEMY_TYPES_NEST_2 = [
-        [9, [
-            [1, 'runner']
-        ]],
-        [1, [
-            [1, 'patrollerRocket'], [1, 'patrollerTrap'], [1, 'patrollerGunner'], 
-        ]]
-    ];
-
-
-Config.ENEMY_TYPES_NEST_3 = [
-        [15, [
-            [4, 'guard'], [2, 'splitterHexagon'], [1, 'disruptor']
-        ]],
-        [1, [
-            [1, 'impedanceDestroyer'], [1, 'impedanceTriple'], [1, 'barracksTrapper'], [1, 'barracksAuto'], 
-        ]]
-    ];
-
-Config.FOOD_TYPES_NESTS = [Config.FOOD_TYPES_NEST, Config.FOOD_TYPES_NEST_2, Config.FOOD_TYPES_NEST_3]
-Config.ENEMY_TYPES_NESTS = [Config.ENEMY_TYPES_NEST, Config.ENEMY_TYPES_NEST_2, Config.ENEMY_TYPES_NEST_3];
-
-function getFoodTypeNest() {
-    return Config.FOOD_TYPES_NESTS[Config.NEST_TYPE];
-}
-function getEnemyTypeNest() {
-    return Config.ENEMY_TYPES_NESTS[Config.NEST_TYPE];
-}
-
-function convert(converted, gameManager) {
-    if(converted == undefined) {
-        return;
-    }
-    convert2(converted, Config.NESTS_CONVERT[gameManager.gameSettings.NEST_TYPE]);
-}
-
-
-Config.NEST_CONVERT = {
-    hexagon: 'pentagon',
-    betaHexagon: 'betaPentagon',
-    alphaHexagon: 'alphaPentagon',
-    heptagon: 'pentagon',
-    betaHeptagon: 'betaPentagon',
-    alphaHeptagon: 'alphaPentagon'
-};
-Config.NEST_CONVERT_2 = {
-    pentagon: 'hexagon',
-    betaPentagon: 'betaHexagon',
-    alphaPentagon: 'alphaHexagon',
-    heptagon: 'hexagon',
-    betaHeptagon: 'betaHexagon',
-    alphaHeptagon: 'alphaHexagon'
-};
-Config.NEST_CONVERT_3 = {
-    pentagon: 'heptagon',
-    betaPentagon: 'betaHeptagon',
-    alphaPentagon: 'alphaHeptagon',
-    hexagon: 'heptagon',
-    betaHexagon: 'betaHeptagon',
-    alphaHexagon: 'alphaHeptagon'
-};
-Config.NESTS_CONVERT = [Config.NEST_CONVERT, Config.NEST_CONVERT_2, Config.NEST_CONVERT_3]
-
-function convert2(converted, conversion) {
-    if(conversion.hasOwnProperty(converted.defs[0])) {
-        converted.upgrades = [];
-        converted.define(conversion[converted.defs[0]]);
-        converted.destroyAllChildren();
-        converted.skill.update();
-        converted.syncTurrets();
-        converted.refreshBodyAttributes();
-        converted.color.interpret(converted.color.compiled);
-    }
-}
-
-let pickFromChanceSet = set => {
-    while (Array.isArray(set)) {
-        set = set[ran.chooseChance(...set.map(e => e[0]))][1];
-    }
-    return set;
-}
-
-Config.NEST_COLORS = ["purple", "hexagon", "#f0ba77"];
-
-function nestConvert(tile) {
-    let entity = ran.choose(tile.entities);
-    convert(entity, tile.gameManager);
-    setTimeout(() => nestConvert(tile), ran.irandom(1000));
-}
-
-
-tileClass.nest = new Tile({
-    DATA: {
-        allowMazeWallToBeSpawned: true,
-        foodSpawnCooldown: 0, foodCount: 0
-    },
-    COLOR: "nest",
-    NAME: "Nest Tile",
-    INIT: (tile, room) => {
-        if (!room.spawnable[TEAM_ENEMIES]) room.spawnable[TEAM_ENEMIES] = [];
-        room.spawnable[TEAM_ENEMIES].push(tile);
-        nestTiles.push(tile);
-        setTimeout(() => nestConvert(tile), 0);
-    },
-});
-let nestTiles = [];
-
-
-Config.FOOD_CAP_NEST = [15,14,12]; // Max nest food per nest tile.
-//Config.FOOD_SPAWN_CHANCE_NEST = [0.25, 0.2, 0.1]; // Likeliness of nest food spawn attempts succeeding.
-//Config.FOOD_SPAWN_COOLDOWN_NEST = [45, 45, 45]; // Cooldown (in game ticks) of nest food spawn attempts being made.
-
-Config.ENEMY_CAP_NEST = [20,20,8], // Max nest enemies per nest tile.
-//Config.ENEMY_SPAWN_CHANCE_NEST = [0.45,0.45,0.01], // Likeliness of nest enemies spawn attempts succeeding.
-//Config.ENEMY_SPAWN_COOLDOWN_NEST = [60,60,60], // Cooldown (in game ticks) of nest enemies spawn attempts being made.
-
 
 
 // BETA POLYGONS
@@ -330,13 +141,13 @@ Class.runner = {
     },
     BODY: {
         SPEED: 10,
-        ACCELERATION: 1,
+        ACCELERATION: 0.75,
         HEALTH: 1,
         DAMAGE: 10,
         PENETRATION: 2,
         PUSHABILITY: 0.5,
         DENSITY: 10,
-        RESIST: 0.5,
+        RESIST: 2,
     },
     MOTION_TYPE: "motor",
     FACING_TYPE: "smoothWithMotion",
@@ -351,7 +162,7 @@ Class.guard = {
     PARENT: "crasher",
     TYPE: "crasher",
     LABEL: "Guard",
-    COLOR: "#ca9653",
+    COLOR: "orange",
     VALUE: 200,
     SHAPE: [
       [-0.25,1],
@@ -383,6 +194,18 @@ Class.guard = {
     DRAW_HEALTH: true,
     HEALTH_WITH_LEVEL: false,
 }
+Class.guardProp = {
+    LABEL: "",
+    COLOR: "orange",
+    SHAPE: [
+      [-0.25,1],
+      [-0.25,-1],
+      [Math.sqrt(3/4)-1/4,-0.5],
+      [Math.sqrt(3/4)-1/4,0.5]
+    ],
+    SIZE: 25,
+    INDEPENDENT: true
+}
 
 
 Class.splitterHexagon = {
@@ -393,7 +216,7 @@ Class.splitterHexagon = {
     SHAPE: [
       [1,0]
     ],
-    COLOR: "#ca9653",
+    COLOR: "orange",
     SIZE: 25,
     VARIES_IN_SIZE: true,
     CONTROLLERS: ["nearestDifferentMaster", "mapTargetToGoal"],
@@ -419,11 +242,11 @@ Class.splitterHexagon = {
     PROPS: [
         {
             POSITION: [25, 3.125, 0, 270, 2],
-            TYPE: "guard",
+            TYPE: "guardProp",
         },
         {
             POSITION: [25, 3.125, 0, 90, 2],
-            TYPE: "guard",
+            TYPE: "guardProp",
         }
     ],
     GUNS: [
@@ -719,8 +542,8 @@ Class.nest2_genericBarracks = {
       [1,0]
     ],
     DANGER: 3,
-    COLOR: "#ca9653",
-    UPGRADE_COLOR: "#ca9653",
+    COLOR: "orange",
+    UPGRADE_COLOR: "orange",
     SIZE: 25,
     SKILL: skillSet({
         rld: 0.5,
@@ -760,11 +583,11 @@ Class.nest2_genericBarracks = {
     PROPS: [
         {
             POSITION: [25, 3.125, 0, 270, 2],
-            TYPE: "guard",
+            TYPE: "guardProp",
         },
         {
             POSITION: [25, 3.125, 0, 90, 2],
-            TYPE: "guard",
+            TYPE: "guardProp",
         }
     ]
 }
@@ -781,8 +604,8 @@ Class.nest2_genericSoldier = {
       [Math.sqrt(3/4)-1/4,0.5]
     ],
     DANGER: 3,
-    COLOR: "#ca9653",
-    UPGRADE_COLOR: "#ca9653",
+    COLOR: "orange",
+    UPGRADE_COLOR: "orange",
     SIZE: 25,
     SKILL: skillSet({
         rld: 0.5,
@@ -824,7 +647,7 @@ Class.nest2_genericSoldier = {
 Class.barracksTrapper = {
     PARENT: "nest2_genericBarracks",
     UPGRADE_LABEL: "Trapper Barracks",
-    UPGRADE_COLOR: "#ca9653",
+    UPGRADE_COLOR: "orange",
     GUNS: [
         ...weaponArray([
             {
@@ -893,7 +716,7 @@ Class.builderTurret = makeTurret({
 Class.soldierTrapper = {
     PARENT: "nest2_genericSoldier",
     UPGRADE_LABEL: "Trapper Soldier",
-    UPGRADE_COLOR: "#ca9653",
+    UPGRADE_COLOR: "orange",
     GUNS: [
         {
             POSITION: [4.5, 7, 1, 8-3.125, 0, 0, 0],
@@ -935,7 +758,7 @@ Class.soldierTrapper = {
 Class.barracksAuto = {
     PARENT: "nest2_genericBarracks",
     UPGRADE_LABEL: "Auto Barracks",
-    UPGRADE_COLOR: "#ca9653",
+    UPGRADE_COLOR: "orange",
     GUNS: [
         {
             POSITION: [1, 0, 1, 5, 0, 90, Infinity],
@@ -980,7 +803,7 @@ Class.barracksAuto = {
 Class.soldierAuto = {
     PARENT: "nest2_genericSoldier",
     UPGRADE_LABEL: "Auto Soldier",
-    UPGRADE_COLOR: "#ca9653",
+    UPGRADE_COLOR: "orange",
     TURRETS: [
         {
             POSITION: [5, 10-3.125, 0, 0, 190, 0],
@@ -1026,4 +849,4 @@ Config.FOOD_TYPES = [
         [0.0001, [
             [100000, 'sphere'], [10000, 'cube'], [1000, 'tetrahedron'], [100, 'octahedron'], [10, 'dodecahedron'], [1, 'icosahedron']
         ]]
-    ]
+];
