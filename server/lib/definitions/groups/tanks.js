@@ -3545,7 +3545,7 @@ Class.skimmer = {
         {
             POSITION: [17, 15, 1, 0, 0, 0, 0],
             PROPERTIES: {
-                SHOOT_SETTINGS: combineStats([g.basic, g.pounder, g.artillery, g.artillery, g.skimmer]),
+                SHOOT_SETTINGS: combineStats([g.basic, g.pounder, g.artillery, g.artillery, g.skimmer, { speed: 0.6, reload: 4/3 }]),
                 TYPE: "missile",
                 STAT_CALCULATOR: "sustained",
             },

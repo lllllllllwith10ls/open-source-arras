@@ -26,6 +26,7 @@ class gamemodeManager {
             if (this.conf.DOMINATION) this.gameDomination.start();
             if (this.conf.MOTHERSHIP) this.gameMothership.start();
             if (this.conf.MAZE_TYPE !== undefined && !this.conf.SPECIAL_BOSS_SPAWNS) this.gameMaze.generate();
+            Events.emit('start', { gameManager: this.gameManager });
         }
         if (type == "loop") {
             this.gameManager.lagLogger.set();
@@ -41,6 +42,7 @@ class gamemodeManager {
         }
         if (type == "quickloop") { // Mainly for sandbox only, but you can also put your own gamemode loop here incase the regular loop doesnt fit.
             if (this.conf.SANDBOX) this.gameSandbox.update();
+            Events.emit('quickloop', { gameManager: this.gameManager });
         }
     }
 

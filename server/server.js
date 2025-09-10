@@ -173,22 +173,22 @@ server.listen(Config.port, () => {
         return;
     }
     /* HOST, GAMEMODE, REGION, { SERVER PROPERTIES } */
-    loadGameServer("localhost:3001", ["sandbox"], "local", {
+    loadGameServer("localhost:3001", ["ffa"], "local", {
         hidden: false,
         gameSpeed: 1,
         runSpeed: 1.5,
         maxPlayers: 10,
-        serverID: 'localsb',
+        serverID: 'localffa',
         TILE_WIDTH: 420,
         TILE_HEIGHT: 420,
-        ENABLE_FOOD: false,
-        FOOD_CAP: 10,
-        FOOD_CAP_NEST: 3,
-        ENEMY_CAP_NEST: 1,
-        FOOD_MAX_GROUP_TOTAL: 2,
-        BOTS: 0,
+        ENABLE_FOOD: true,
+        FOOD_CAP: 70,
+        FOOD_CAP_NEST: 15,
+        ENEMY_CAP_NEST: 10,
+        FOOD_MAX_GROUP_TOTAL: 6,
+        BOTS: 25,
     }); /* HOST, GAMEMODE, REGION, { SERVER PROPERTIES } */
-    loadGameServer("localhost:3002", ["teams", "domination"], "local", { 
+    loadGameServer("localhost:3002", ["opentdm"], "local", { 
         hidden: false,
         gameSpeed: 1,
         runSpeed: 1.5,
@@ -201,7 +201,8 @@ server.listen(Config.port, () => {
         FOOD_CAP_NEST: 15,
         ENEMY_CAP_NEST: 10,
         FOOD_MAX_GROUP_TOTAL: 6,
-        BOTS: 0,
+        BOTS: 100,
+        TEAMS: 4,
      }); /* HOST, GAMEMODE, REGION, { SERVER PROPERTIES } */
      loadGameServer("localhost:3003", ["mothership"], "local", {
         hidden: false,
@@ -217,22 +218,7 @@ server.listen(Config.port, () => {
         ENEMY_CAP_NEST: 10,
         FOOD_MAX_GROUP_TOTAL: 6,
         BOTS: 100,
-     }); /* HOST, GAMEMODE, REGION, { SERVER PROPERTIES } */
-     loadGameServer("localhost:3004", ["siege_blitz"], "local", { 
-        hidden: false,
-        gameSpeed: 1,
-        runSpeed: 1.5,
-        maxPlayers: 10,
-        serverID: 'loc3',
-        TILE_WIDTH: 470,
-        TILE_HEIGHT: 470,
-        ENABLE_FOOD: true,
-        FOOD_CAP: 70,
-        FOOD_CAP_NEST: 15,
-        ENEMY_CAP_NEST: 10,
-        FOOD_MAX_GROUP_TOTAL: 6,
-        BOTS: 0,
-    });
+     });
 });
 
 // Upgrade HTTP connections to WebSocket connections if applicable

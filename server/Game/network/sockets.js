@@ -490,7 +490,7 @@ class socketManager {
             } break;
             case "1": {
                 //suicide squad
-                if (player.body != null && !player.body.underControl && player.body.invuln) {
+                if (player.body != null && !player.body.underControl) {
                     for (let i = 0; i < entities.length; i++) {
                     let instance = entities[i];
                     if (
