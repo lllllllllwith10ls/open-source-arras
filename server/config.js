@@ -33,7 +33,7 @@ module.exports = {
             // Keep in mind that if "LOAD_ON_MAINSERVER" is set to true then this code will be replaced with the main server's port instead.
             PORT: 3001,
             // Get the gamemode you want to select with.
-            GAMEMODE: ["teams"],
+            GAMEMODE: ["ffa"],
             // The region, can be anything.
             REGION: "local",
             // How many players can join until it's full.
@@ -44,7 +44,7 @@ module.exports = {
             // This is where you can override settings in the config.js file, and as long the gamemode's config doesnt override it.
             PROPERTIES: {
                 // Amount of bots.
-                BOTS: 5,
+                BOTS: 25,
             }
         },
     ],
