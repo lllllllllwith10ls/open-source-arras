@@ -1,12 +1,13 @@
-let { bossRush } = require("./gamemodes/bossRush.js");
-let { Assault } = require("./gamemodes/assault.js");
-let { Tag } = require("./gamemodes/tag.js");
-let { Domination } = require("./gamemodes/dominator.js");
-let { Mothership } = require("./gamemodes/mothership.js");
-let { Sandbox } = require("./gamemodes/sandbox.js");
-let { Train } = require("./gamemodes/trainwars.js");
-let { Maze } = require("./gamemodes/maze.js");
-let { Outbreak } = require("./gamemodes/outbreak.js");
+const { bossRush } = require("./gamemodes/bossRush.js");
+const { Assault } = require("./gamemodes/assault.js");
+const { Tag } = require("./gamemodes/tag.js");
+const { Domination } = require("./gamemodes/dominator.js");
+const { Mothership } = require("./gamemodes/mothership.js");
+const { Sandbox } = require("./gamemodes/sandbox.js");
+const { Train } = require("./gamemodes/trainwars.js");
+const { Maze } = require("./gamemodes/maze.js");
+const { Outbreak } = require("./gamemodes/outbreak.js");
+const { ClanWars } = require("./gamemodes/clanwars.js");
 
 class gamemodeManager {
     constructor() {
@@ -19,6 +20,7 @@ class gamemodeManager {
         this.gameMaze = new Maze(global.gameManager, null);
         this.gameTrain = new Train();
         this.gameOutreak = new Outbreak(global.gameManager);
+        this.gameClanwars = new ClanWars(global.gameManager);
     }
 
     request(type) {
@@ -57,6 +59,7 @@ class gamemodeManager {
         if (Config.TAG) Config.TAG_DATA.resetAndStop();
         if (Config.DOMINATION) this.gameDomination.reset();
         if (Config.MOTHERSHIP) this.gameMothership.reset();
+        if (Config.CLAN_WARS) this.gameClanwars.reset();
     }
 
     redefine(theshit) {
@@ -65,7 +68,7 @@ class gamemodeManager {
         this.gameTag.redefine(theshit);
         this.gameSandbox.redefine(theshit);
         this.gameMaze.redefine(Config.MAZE_TYPE);
-        this.gameOutreak.redefine(theshit);
+        this.gameClanwars.redefine(theshit);
     }
 }
 

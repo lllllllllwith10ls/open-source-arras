@@ -16,7 +16,7 @@ const getName = (name, gamemodeData) => {
         ffa: "FFA",
         tag: "Tag",
         opentdm: `Open ${gamemodeData.TEAMS}TDM`,
-        // clanwars: "Clan Wars",
+        clanwars: "Clan Wars",
         trainwars: "Train Wars",
         old_dreadnoughts: `Old Dreadnoughts ${gamemodeData.TEAMS}TDM`,
         nexus: "Nexus",
@@ -28,14 +28,20 @@ const getName = (name, gamemodeData) => {
         siege_fortress: "Siege Fortress",
         siege_og: "OG Siege",
         siege_legacy: "Siege Legacy",
+        assault_bunker: "Assault Bunker",
         assault_booster: "Assault Booster",
+        assault_trenches: "Assault Trenches",
+        assault_line: "Assault Line",
+        assault_eye: "Assault Eye",
+        assault_yinyang: "Assault Yin Yang",
+        assault_acropolis: "Assault Acropolis",
     };
     return nameMap[name]; 
 }
 
 // Here is our actual game server
 class gameServer {
-    constructor(host, port, gamemode, region, webProperties, serverProperties, parentPort, loaderGlobal) {
+    constructor(host, port, gamemode, region, webProperties, serverProperties, isfeatured, parentPort, loaderGlobal) {
         // Override the default settings in Config.js.
         Object.keys(serverProperties).forEach(key => {
             Config[key] = serverProperties[key];
@@ -48,6 +54,7 @@ class gameServer {
         this.webProperties = webProperties;
         this.serverProperties = serverProperties;
         this.name = "Unknown";
+        this.featured = isfeatured;
         this.parentPort = parentPort;
         this.definitionsCombiner = new definitionCombiner({ groups: fs.readdirSync(path.join(__dirname, './lib/definitions/groups')), addonsFolder: path.join(__dirname, './lib/definitions/tankAddons') });
         this.loaderGlobal = loaderGlobal;
@@ -87,6 +94,7 @@ class gameServer {
             players: this.socketManager.clients.length,
             maxPlayers: this.webProperties.maxPlayers,
             id: this.webProperties.id,
+            featured: this.featured,
             region: this.region,
             gameMode: this.name,
             gameManager: includegameManager ? this : false,
@@ -217,14 +225,15 @@ class gameServer {
             };
             // Update the server gamemode name
             this.name = this.gamemode.map(x => getName(x, Config) || (x[0].toUpperCase() + x.slice(1))).join(' ');
+            // Activate laby food if enabled
+            if (Config.LABY_FOOD) global.activateLabyFood();
             // Initalize the room
             this.setRoom();
             setTimeout(() => {
                 // Set the gamemode manager
                 this.gamemodeManager.redefine(this);
                 // Wake it up
-                setTimeout(() => this.gamemodeManager.request("start"), 100);
-                //console.log(ensureIsClass("healerSymbol"))
+                this.gamemodeManager.request("start");
             }, 200);
 
             // Check if we have a server travel properties.
@@ -265,12 +274,10 @@ class gameServer {
             };
 
 
-            setTimeout(() => {
-                // Set the gamemode manager again.
-                this.gamemodeManager.redefine(this);
-                // Wake up gamemode manager
-                this.gamemodeManager.request("start");
-            }, 200);
+            // Set the gamemode manager again.
+            this.gamemodeManager.redefine(this);
+            // Wake up gamemode manager
+            this.gamemodeManager.request("start");
         }
 
         // Run the server
@@ -317,7 +324,7 @@ class gameServer {
         // Set properties.
         this.setRoomProperties();
 
-        // And bunch of functions to it
+        // And a bunch of functions to it
 
         // Are we in the room?
         this.room.isInRoom = location => {
@@ -333,7 +340,7 @@ class gameServer {
             };
         };
 
-        // Get random position in the room
+        // Get a random position in the room
         this.room.random = () => {
             return {
                 x: ran.irandom(this.room.width) - this.room.width / 2,
@@ -383,7 +390,7 @@ class gameServer {
         });
     }
 
-    // Setup the room
+    // Set up the room
     setRoom() {
         // Get the room setup(s)
         for (let filename of Config.ROOM_SETUP) {
@@ -422,7 +429,7 @@ class gameServer {
         // Update all the entities
         for (let entity of entities.values()) {
             let tile = this.room.getAt(entity);
-            if (tile && !entity.godmode && !entity.bond) tile.entities.push(entity);
+            if (tile && !entity.godmode && !entity.bond && !entity.immuneToTiles) tile.entities.push(entity);
         }
         // Update all the tiles
         for (let y = 0; y < this.room.setup.length; y++) {
@@ -434,7 +441,7 @@ class gameServer {
             }
         }
 
-        // If client doesn't yet know what are we doing, broadcast it to him.
+        // If a client doesn't yet know what are we doing, broadcast it to him.
         // But only once
         if (this.room.sendColorsToClient) {
             this.room.sendColorsToClient = false;
@@ -444,7 +451,7 @@ class gameServer {
 
     // Arena closers here we come
     closeArena() {
-        // Check if arena is closed
+        // Check if the arena is closed
         if (this.arenaClosed) return;
         // Log this
         util.saveToLog("Game Instance Ending", "Game running " + this.gamemode + " at `" + this.gamemode + "` is now closing.", 0xEE4132);
@@ -472,7 +479,7 @@ class gameServer {
                         FULL_VIEW: true,
                         SKYNET: true,
                         BLIND: true,
-                        LIKES_SHAPES: true,
+                        CHASE: true,
                     },
                     CONTROLLERS: [["nearestDifferentMaster", { lockThroughWalls: true }], "mapTargetToGoal"],
                     SKILL: Array(10).fill(9),

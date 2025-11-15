@@ -119,9 +119,12 @@ let initializeFilter = () => {
             minigames: [],
         }
     }
+    let nvmText = document.createElement("td");
+    nvmText.textContent = "No Server Matches";
+    nvmText.classList.add("tdCenter");
     let noServerMatches = document.createElement("tr");
     noServerMatches.classList.add("message");
-    noServerMatches.appendChild(document.createTextNode("No Server Matches"));
+    noServerMatches.appendChild(nvmText);
     noServerMatches.style.display = "none";
     noServerMatches.style.width = "325px";
     tbody.appendChild(noServerMatches);

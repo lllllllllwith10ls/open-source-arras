@@ -1,5 +1,3 @@
-const { triAngle } = require("../../lib/definitions/gunvals");
-
 let calculatePoints = wave => 5 + wave * 3;
 // Each wave has a certain amount of "points" that it can spend on bosses, calculated above.
 // Each boss costs an amount of points.
@@ -282,6 +280,18 @@ class bossRush {
     // runs once when the server starts
     start(mazeType) {
         this.gameActive = true;
+        for (let i = 0; i < Class.basic.UPGRADES_TIER_1.length; i++) {
+            let string = Class.basic.UPGRADES_TIER_1[i];
+            if (string === "desmos") {
+                Class.basic.UPGRADES_TIER_1[i] = "healer";
+            }
+        }
+        for (let i = 0; i < Class.basic.UPGRADES_TIER_2.length; i++) {
+            let string = Class.basic.UPGRADES_TIER_2[i];
+            if (string === "smasher") {
+                Class.basic.UPGRADES_TIER_2[i] = "single";
+            }
+        }
         for (let tile of this.room.spawnable[TEAM_BLUE]) {
             tile.color = tile.bluePrint.COLOR;
             this.leftSanctuaries += 1;
@@ -298,9 +308,18 @@ class bossRush {
                 })
                 wall.define("wall");
                 wall.SIZE = global.gameManager.room.width / width / 2 * element.size / lazyRealSizes[4] * Math.SQRT2 - 2;
+                wall.life();
                 wall.protect();
                 makeHitbox(wall);
                 walls.push(wall);
+                if (Config.HALLOWEEN_THEME) {
+                    let eyeSize = 12 * (Math.random() + 0.75);
+                    let spookyEye = new Entity({ x: wall.x + (wall.size - eyeSize * 2) * Math.random() - wall.size / 2, y: wall.y + (wall.size - eyeSize * 2) * Math.random() - wall.size / 2 })
+                    spookyEye.define("hwEye");
+                    spookyEye.define({FACING_TYPE: ["manual", {angle: ran.randomAngle()}]})
+                    spookyEye.SIZE = eyeSize;
+                    spookyEye.minimapColor = 18;
+                }
             });
         }
     }
