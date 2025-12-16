@@ -103,7 +103,7 @@ Config.ENEMY_TYPES_NEST_2 = [
 
 
 Config.ENEMY_TYPES_NEST_3 = [
-        [15, [
+        [10, [
             [4, 'guard'], [2, 'splitterHexagon'], [1, 'disruptor']
         ]],
         [1, [
@@ -184,11 +184,11 @@ function nestConvert(tile) {
 
 
 Config.FOOD_CAPS_NEST = [15, 14, 12]; // Max nest food per nest.
-Config.FOOD_SPAWN_CHANCES_NEST = [1, 0.8, 0.5]; // Likeliness of nest food spawn attempts succeeding.
+Config.FOOD_SPAWN_CHANCES_NEST = [1, 0.9, 0.7]; // Likeliness of nest food spawn attempts succeeding.
 //Config.FOOD_SPAWN_COOLDOWN_NEST = [45, 45, 45]; // Cooldown (in game ticks) of nest food spawn attempts being made.
 
 Config.ENEMY_CAPS_NEST = [20, 20, 8]; // Max nest enemies per nest.
-Config.ENEMY_SPAWN_CHANCES_NEST = [1/3,1/3,1/12], // Likeliness of nest enemies spawn attempts succeeding.
+Config.ENEMY_SPAWN_CHANCES_NEST = [1/3,1/3,1/6], // Likeliness of nest enemies spawn attempts succeeding.
 //Config.ENEMY_SPAWN_COOLDOWN_NEST = [60,60,60], // Cooldown (in game ticks) of nest enemies spawn attempts being made.
 
 

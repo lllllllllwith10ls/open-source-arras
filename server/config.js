@@ -231,7 +231,7 @@ module.exports = {
     ],
 
     // Cooldown (in seconds) of boss spawns being announced.
-    BOSS_SPAWN_COOLDOWN: 0,
+    BOSS_SPAWN_COOLDOWN: 1,
     // The delay (in seconds) between the boss spawns being announced and the bosses actually spawning.
     // NOTE: The spawn message (ex. "A strange trembling...") takes half as long to appear than the boss.
     BOSS_SPAWN_DURATION: 6,
@@ -240,8 +240,8 @@ module.exports = {
         bosses: ["eliteDestroyer", "eliteGunner", "eliteSprayer", "eliteBattleship", "eliteSpawner"],
         amount: [5, 5, 4, 2, 1], chance: 2, nameType: "a",
     },{
-        bosses: ["eliteBomber"],
-        amount: [2, 1, 1], chance: 2, nameType: "a",
+        bosses: ["eliteBomber","eliteFighter"],
+        amount: [2, 1, 1], chance: 200000000000000000, nameType: "a",
     },{
         bosses: ["roguePalisade"],
         amount: [4, 1], chance: 1, nameType: "castle",

@@ -501,14 +501,14 @@ Class.jetMultiShot = {
         {
             POSITION: [  15,     4,      1,      0,      -3,     -10,    0,   ], 
             PROPERTIES: {
-                SHOOT_SETTINGS: combineStats([g.basic, g.twin, g.tripleShot, g.pelleter, g.lowPower]),
+                SHOOT_SETTINGS: combineStats([g.basic, g.twin, g.tripleShot, g.pelleter]),
                 TYPE: "bullet",
             }, 
         }, 
         {
             POSITION: [  15,     4,      1,      0,      3,      10,    0,   ], 
             PROPERTIES: {
-                SHOOT_SETTINGS: combineStats([g.basic, g.twin, g.tripleShot, g.pelleter, g.lowPower]),
+                SHOOT_SETTINGS: combineStats([g.basic, g.twin, g.tripleShot, g.pelleter]),
                 TYPE: "bullet",
             },
         },
@@ -718,6 +718,91 @@ Class.rocketDrone = {
     ],
 }
 
+
+Class.jetTwinSpawner = {
+    PARENT: "genericTank",
+    LABEL: "Twin Spawner",
+    DANGER: 7,
+    STAT_NAMES: statnames.drone,
+    BODY: {
+        SPEED: base.SPEED * 0.8,
+        FOV: 1.1,
+    },
+    GUNS: [
+        {
+            POSITION: [5, 10, 1, 10.5, 0, 0, 0],
+        },
+        {
+            POSITION: [1, 12, 1, 15.5, 0, 0, 0],
+            PROPERTIES: {
+                MAX_CHILDREN: 4,
+                SHOOT_SETTINGS: combineStats([g.factory, g.babyfactory]),
+                TYPE: "twinMinion",
+                STAT_CALCULATOR: "drone",
+                AUTOFIRE: true,
+                SYNCS_SKILLS: true,
+            },
+        },
+        {
+            POSITION: [12, 4, 1, 0, 4, 0, 0],
+        },
+        {
+            POSITION: [12, 4, 1, 0, -4, 0, 0],
+        },
+    ],
+}
+
+Class.twinMinion = {
+    PARENT: "genericTank",
+    LABEL: "Minion",
+    TYPE: "minion",
+    DAMAGE_CLASS: 0,
+    HITS_OWN_TYPE: "hardWithBuffer",
+    FACING_TYPE: "smoothToTarget",
+    BODY: {
+        FOV: 0.5,
+        SPEED: 1.8,
+        ACCELERATION: 1,
+        HEALTH: 5,
+        SHIELD: 0,
+        DAMAGE: 1.2,
+        RESIST: 1,
+        PENETRATION: 1,
+        DENSITY: 0.4,
+    },
+    AI: {
+        BLIND: true,
+    },
+    DRAW_HEALTH: false,
+    CLEAR_ON_MASTER_UPGRADE: true,
+    GIVE_KILL_MESSAGE: false,
+    CONTROLLERS: [
+        "nearestDifferentMaster",
+        "mapAltToFire",
+        "minion",
+        "canRepel",
+        "hangOutNearMaster",
+    ],
+    GUNS: [
+        {
+            POSITION: [19, 8.5, 1, 0, 5.5, 0, 0],
+            PROPERTIES: {
+                SHOOT_SETTINGS: combineStats([g.basic, g.minionGun, g.twin]),
+                WAIT_TO_CYCLE: true,
+                TYPE: "bullet",
+            },
+        },
+        {
+            POSITION: [19, 8.5, 1, 0, -5.5, 0, 0.5],
+            PROPERTIES: {
+                SHOOT_SETTINGS: combineStats([g.basic, g.minionGun, g.twin]),
+                WAIT_TO_CYCLE: true,
+                TYPE: "bullet",
+            },
+        },
+    ],
+},
+
 Class.basic.UPGRADES_TIER_1.splice(Class.basic.UPGRADES_TIER_1.indexOf("desmos"),1);
 Class.twin.UPGRADES_TIER_2.splice(Class.twin.UPGRADES_TIER_2.indexOf("helix"),1);
 Class.flankGuard.UPGRADES_TIER_3.splice(Class.flankGuard.UPGRADES_TIER_3.indexOf("quadruplex"),1);
@@ -760,6 +845,7 @@ Class.hexaTank.UPGRADES_TIER_3.push("jetHexaMachineGun","jetBurst");
 Class.jetTorrent.UPGRADES_TIER_3 = ["jetCascade","jetSplasher","jetSoaker"];
 Class.sprayer.UPGRADES_TIER_3.push("jetSplasher");
 Class.overseer.UPGRADES_TIER_3.push("jetSilo");
+Class.spawner.UPGRADES_TIER_3.push("jetTwinSpawner");
 
 let MAX_CHILDREN = 0,
 	GUNS = [],

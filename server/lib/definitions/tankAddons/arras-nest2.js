@@ -5,8 +5,12 @@ const g = require('../gunvals.js');
 
 
 
-Class.nest2 = menu("Nest 2.0")
-Class.nest2.UPGRADES_TIER_0 = ['patrollerRocket','patrollerTrap', 'patrollerGunner', 'impedanceDestroyer', 'impedanceTriple', 'barracksTrapper', 'soldierTrapper', 'barracksAuto', 'soldierAuto'] ;
+Class.nest2 = menu("Nest 2.0");
+Class.nest2.UPGRADES_TIER_0 = ["nest2Enemies", "nest2Bosses"];
+Class.nest2Enemies = menu("Enemies");
+Class.nest2Enemies.UPGRADES_TIER_0 = ['patrollerRocket', 'patrollerTrap', 'patrollerGunner', 'impedanceDestroyer', 'impedanceTriple', 'barracksTrapper', 'soldierTrapper', 'barracksAuto', 'soldierAuto'];
+Class.nest2Bosses = menu("Bosses");
+Class.nest2Bosses.UPGRADES_TIER_0 = ["eliteBomber","eliteFighter","spectator2"];
 Class.addons.UPGRADES_TIER_0.push("nest2");
 
 
@@ -98,7 +102,7 @@ Class.heptagon = {
     LABEL: "Heptagon",
     VALUE: 700,
     SHAPE: 7,
-    SIZE: 27.5,
+    SIZE: 30,
     COLOR: "#f0ba77",
     BODY: {
         DAMAGE: 3.5 * basePolygonDamage,
@@ -759,6 +763,18 @@ Class.barracksAuto = {
     PARENT: "nest2_genericBarracks",
     UPGRADE_LABEL: "Auto Barracks",
     UPGRADE_COLOR: "orange",
+    SKILL: skillSet({
+        rld: 0.5,
+        dam: 0.5,
+        pen: 0.4,
+        str: 0.1,
+        spd: 0.5,
+        atk: 0.8,
+        hlt: 0,
+        shi: 0,
+        rgn: 0.7,
+        mob: 0,
+    }),
     GUNS: [
         {
             POSITION: [1, 0, 1, 5, 0, 90, Infinity],
@@ -804,6 +820,18 @@ Class.soldierAuto = {
     PARENT: "nest2_genericSoldier",
     UPGRADE_LABEL: "Auto Soldier",
     UPGRADE_COLOR: "orange",
+    SKILL: skillSet({
+        rld: 0.5,
+        dam: 0.5,
+        pen: 0.4,
+        str: 0.1,
+        spd: 0.5,
+        atk: 0.8,
+        hlt: 0,
+        shi: 0,
+        rgn: 0.7,
+        mob: 0,
+    }),
     TURRETS: [
         {
             POSITION: [5, 10-3.125, 0, 0, 190, 0],
@@ -850,3 +878,243 @@ Config.FOOD_TYPES = [
             [100000, 'sphere'], [10000, 'cube'], [1000, 'tetrahedron'], [100, 'octahedron'], [10, 'dodecahedron'], [1, 'icosahedron']
         ]]
 ];
+
+//BOSSES
+
+
+Class.eliteRunner = {
+    PARENT: "miniboss",
+    LABEL: "Elite Runner",
+    FACING_TYPE: "smoothToTarget",
+    CONTROLLERS: ["nearestDifferentMaster", "canRepel", "mapTargetToGoal"],
+    COLOR: "#50a465", //oklch(65% 0.125 150)
+    SHAPE: [
+      [-1,-1],
+      [0.25,-1],
+      [1,0],
+      [0.25,1],
+      [-1,1],
+      [-0.25,0]
+    ],
+    SIZE: 27,
+    VALUE: 15e4,
+    SKILL: [5, 9, 9, 9, 5, 1, 0, 9, 1, 9],
+    BODY: {
+        FOV: 1.25,
+        SPEED: 0.5 * base.SPEED,
+        ACCELERATION: 0.3,
+        HEALTH: 12 * base.HEALTH,
+        DAMAGE: 9 * base.DAMAGE,
+        REGEN: 0.5 * base.REGEN,
+    },
+};
+
+Class.eliteBomber = {
+    PARENT: "eliteRunner",
+    UPGRADE_LABEL: "Elite Bomber",
+    UPGRADE_COLOR: "#50a465",
+    GUNS: [{
+        POSITION: [2, 10, 1.1, 9.5, 3.5, 90, 0],
+        PROPERTIES: {
+            SHOOT_SETTINGS: combineStats([g.drone, { speed: 0.3, maxSpeed: 0.3, health: 0.5, damage: 0.2, resist: 1.05 }]),
+            TYPE: "runnerDrone",
+            STAT_CALCULATOR: "drone",
+            MAX_CHILDREN: 8,
+        },
+    }, {
+        POSITION: [2, 10, 1.1, 9.5, -3.5, 270, 0],
+        PROPERTIES: {
+            SHOOT_SETTINGS: combineStats([g.drone, { speed: 0.3, maxSpeed: 0.3, health: 0.5, damage: 0.2, resist: 1.05 }]),
+            TYPE: "runnerDrone",
+            STAT_CALCULATOR: "drone",
+            MAX_CHILDREN: 8,
+        },
+    },
+    {
+        POSITION: [9, 8, 1, 0, 0, 180, 0],
+    },
+    {
+        POSITION: [4, 8, 1.7, 9, 0, 180, 0],
+        PROPERTIES: {
+            SHOOT_SETTINGS: combineStats([g.trap, { shudder: 0.4, speed: 0.25, reload: 0.75 }]),
+            TYPE: "trap",
+            STAT_CALCULATOR: "trap",
+        },
+    },
+    {
+        POSITION: [6, 4, 1, 4, 6, 180, 0],
+        PROPERTIES: {
+            SHOOT_SETTINGS: combineStats([g.basic, g.flankGuard, g.triAngle, g.thruster]),
+            TYPE: "bullet",
+            LABEL: "thruster",
+        },
+    },
+    {
+        POSITION: [6, 4, 1, 4, -6, 180, 0],
+        PROPERTIES: {
+            SHOOT_SETTINGS: combineStats([g.basic, g.flankGuard, g.triAngle, g.thruster]),
+            TYPE: "bullet",
+            LABEL: "thruster",
+        },
+    }]
+};
+
+
+Class.runnerDrone = {
+    PARENT: "drone",
+    SHAPE: [
+      [-1,-1],
+      [0.25,-1],
+      [1,0],
+      [0.25,1],
+      [-1,1],
+      [-0.25,0]
+    ],
+    BODY: {
+        SPEED: 10,
+        ACCELERATION: 0.05,
+    },
+}
+
+
+
+Class.spectator2 = {
+    PARENT: "genericTank",
+    LABEL: "Spectator",
+    ALPHA: 0,
+    CAN_BE_ON_LEADERBOARD: false,
+    ACCEPTS_SCORE: false,
+    DRAW_HEALTH: false,
+    HITS_OWN_TYPE: "never",
+    IGNORED_BY_AI: true,
+    ARENA_CLOSER: true,
+    IS_IMMUNE_TO_TILES: true,
+    TOOLTIP: "Left click to spawn, Right click above or below the screen to change FOV",
+    SKILL_CAP: [0, 0, 0, 0, 0, 0, 0, 0, 0, 255],
+    BODY: {
+        PUSHABILITY: 0,
+        SPEED: 5,
+        FOV: 2.5,
+        DAMAGE: 0,
+        HEALTH: 1e100,
+        SHIELD: 1e100,
+        REGEN: 1e100,
+    },
+    GUNS: [{
+        POSITION: [0,0,0,0,0,0,0],
+        PROPERTIES: {
+            SHOOT_SETTINGS: combineStats([g.basic, {reload: 0.2}, g.fake]),
+            TYPE: "bullet",
+            ALPHA: 0
+        }
+    }, {
+        POSITION: [0, 0, 0, 0, 0, 0, 0],
+        PROPERTIES: {
+            SHOOT_SETTINGS: combineStats([g.basic, { reload: 0.25 }, g.fake]),
+            TYPE: "bullet",
+            ALPHA: 0,
+            ALT_FIRE: true,
+        }
+    }],
+    ON: [{
+        event: "fire",
+        handler: ({ body }) => {
+            let o = new Entity({ x: body.x + body.control.target.x, y: body.y + body.control.target.y });
+            o.define("eliteBomber");
+        }
+    }, {
+        event: "altFire",
+        handler: ({ body }) => body.FOV = body.y + body.control.target.y < body.y ? body.FOV + 0.5 : Math.max(body.FOV - 0.5, 0.2)
+    }]
+};
+
+Class.eliteFighter = {
+    PARENT: "eliteRunner",
+    UPGRADE_LABEL: "Elite Fighter",
+    UPGRADE_COLOR: "#50a465",
+    GUNS: [
+        {
+            POSITION: [7, 2, 1, 9, 1, 90, 0],
+            PROPERTIES: {
+                SHOOT_SETTINGS: combineStats([g.basic, g.pelleter, g.twin]),
+                TYPE: "bullet",
+            },
+        },
+        {
+            POSITION: [7, 2, 1, 9, 6, 90, 0.5],
+            PROPERTIES: {
+                SHOOT_SETTINGS: combineStats([g.basic, g.pelleter, g.twin]),
+                TYPE: "bullet",
+            },
+        },
+        {
+            POSITION: [3, 11, 1, 9, 3.5, 90, 0],
+        }, {
+            POSITION: [7, 2, 1, 9, -1, 270, 0.5],
+            PROPERTIES: {
+                SHOOT_SETTINGS: combineStats([g.basic, g.pelleter, g.twin]),
+                TYPE: "bullet",
+            },
+        },
+        {
+            POSITION: [7, 2, 1, 9, -6, 270, 0],
+            PROPERTIES: {
+                SHOOT_SETTINGS: combineStats([g.basic, g.pelleter, g.twin]),
+                TYPE: "bullet",
+            },
+        },
+        {
+            POSITION: [3, 11, 1, 9, -3.5, 270, 0],
+        }, {
+            POSITION: [7, 2, 1, 9, 2.5, 0, 0.5],
+            PROPERTIES: {
+                SHOOT_SETTINGS: combineStats([g.basic, g.pelleter, g.twin]),
+                TYPE: "bullet",
+            },
+        },
+        {
+            POSITION: [7, 2, 1, 9, -2.5, 0, 0],
+            PROPERTIES: {
+                SHOOT_SETTINGS: combineStats([g.basic, g.pelleter, g.twin]),
+                TYPE: "bullet",
+            },
+        },
+        {
+            POSITION: [7, 11, 1, 4, 0, 0, 0],
+        },
+        {
+            POSITION: [12, 8, 1.5, -2, 2, 180, 1 / 3],
+            PROPERTIES: {
+                SHOOT_SETTINGS: combineStats([g.basic, g.missileTrail, g.rocketeerMissileTrail, { recoil: 0.5 }]),
+                TYPE: "bullet",
+                STAT_CALCULATOR: "thruster",
+            },
+        },
+        {
+            POSITION: [12, 8, 1.5, -2, -2, 180, 2 / 3],
+            PROPERTIES: {
+                SHOOT_SETTINGS: combineStats([g.basic, g.missileTrail, g.rocketeerMissileTrail, { recoil: 0.5 }]),
+                TYPE: "bullet",
+                STAT_CALCULATOR: "thruster",
+            },
+        },
+        {
+            POSITION: [12, 8, 1.5, 0, 0, 180, 0],
+            PROPERTIES: {
+                SHOOT_SETTINGS: combineStats([g.basic, g.missileTrail, g.rocketeerMissileTrail, { recoil: 0.5 }]),
+                TYPE: "bullet",
+                STAT_CALCULATOR: "thruster",
+            },
+        }],
+    TURRETS: [{
+        POSITION: [5, -2, 0, 180, 360, 1],
+        TYPE: [
+            "autoTurret",
+            {
+                CONTROLLERS: ["nearestDifferentMaster"],
+                INDEPENDENT: true,
+                COLOR: 16,
+            },
+        ]
+    }]
+};
