@@ -22,21 +22,21 @@ let ticker = {
 }
 
 
-Events.on('start', () => ticker.setSyncedTimeout(() => updateNestFoodType(Config.NEST_TYPE), 1));
+Events.on('start', () => ticker.setSyncedTimeout(() => updateNestFoodType(Config.nest_type), 1));
 Events.on('start', () => ticker.setSyncedTimeout(() => global.gameManager.gameHandler.foodloop = foodloop2, 2));
 Events.on('quickloop', ({ }) => ticker.syncedDelaysLoop());
 
-Config.NEST_TYPE_NAMES = ["pentagons", "hexagons", "heptagons"];
-Config.NEST_CHANCES = [[5, 0], [ 4, 1], [ 3, 2]]
+Config.nest_type_names = ["pentagons", "hexagons", "heptagons"];
+Config.nest_chances = [[5, 0], [ 4, 1], [ 3, 2]]
 
-Config.NEST_TYPE = 2;
+Config.nest_type = 2;
 
 function changeNestFoodType() {
   let setting = 0;
   
-  setting=pickFromChanceSet(Config.NEST_CHANCES);
-  if(setting != Config.NEST_TYPE) {
-    global.gameManager.socketManager.broadcast("The nest is being overtaken by " + Config.NEST_TYPE_NAMES[setting] + "!");
+  setting=pickFromChanceSet(Config.nest_chances);
+  if(setting != Config.nest_type) {
+    global.gameManager.socketManager.broadcast("The nest is being overtaken by " + Config.nest_type_names[setting] + "!");
     setSyncedTimeout(()=> updateNestFoodType(setting), 150);
   } else {
     setSyncedTimeout(()=>changeNestFoodType(), (ran.irandom(360) + 240)*100); // 6000
@@ -46,18 +46,18 @@ function changeNestFoodType() {
 
 function updateNestFoodType(setting) {
   
-    Config.NEST_TYPE = setting;
-    Config.CURRENT_COLOR = Config.NEST_COLORS[setting];
-    Config.ENEMY_CAP_NEST = Config.ENEMY_CAPS_NEST[setting];
-    Config.ENEMY_TYPES_NEST = Config.ENEMY_TYPES_NESTS[setting];
-    Config.FOOD_CAP_NEST = Config.FOOD_CAPS_NEST[setting];
-    Config.FOOD_SPAWN_CHANCE_NEST = Config.FOOD_SPAWN_CHANCES_NEST[setting];
-    Config.ENEMY_SPAWN_CHANCE_NEST = Config.ENEMY_SPAWN_CHANCES_NEST[setting];
-    Config.FOOD_TYPES_NEST = Config.FOOD_TYPES_NESTS[setting];
+    Config.nest_type = setting;
+    Config.current_color = Config.nest_colors[setting];
+    Config.enemy_cap_nest = Config.enemy_caps_nest[setting];
+    Config.enemy_types_nest = Config.enemy_types_nests[setting];
+    Config.food_cap_nest = Config.food_caps_nest[setting];
+    Config.food_spawn_chance_nest = Config.food_spawn_chances_nest[setting];
+    Config.enemy_spawn_chance_nest = Config.enemy_spawn_chances_nest[setting];
+    Config.food_types_nest = Config.food_types_nests[setting];
     for (let i = 0; i < global.gameManager.room.setup.length; i++) {
         for (let j = 0; j < global.gameManager.room.setup[i].length; j++) {
             if (global.gameManager.room.setup[i][j].name === "Nest Tile") {
-                global.gameManager.room.setup[i][j].color = Config.CURRENT_COLOR;
+                global.gameManager.room.setup[i][j].color = Config.current_color;
             }
         }
     }
@@ -66,24 +66,24 @@ function updateNestFoodType(setting) {
     setSyncedTimeout(()=>changeNestFoodType(), (ran.irandom(360) + 240)*100); // 300000
 }
 
-Config.FOOD_TYPES_NEST = [
+Config.food_types_nest = [
     [1, [
         [16, 'pentagon'], [ 4, 'betaPentagon'], [ 1, 'alphaPentagon']
     ]]
 ];
-Config.FOOD_TYPES_NEST_2 = [
+Config.food_types_nest_2 = [
     [1, [
         [36, 'hexagon'], [ 6, 'betaHexagon'], [ 1, 'alphaHexagon']
     ]]
 ];
 
-Config.FOOD_TYPES_NEST_3 = [
+Config.food_types_nest_3 = [
     [1, [
         [49, 'heptagon'], [ 7, 'betaHeptagon'], [ 1, 'alphaHeptagon']
     ]]
 ];
 
-Config.ENEMY_TYPES_NEST = [
+Config.enemy_types_nest = [
     [19, [
         [1, 'crasher']
     ]],
@@ -92,7 +92,7 @@ Config.ENEMY_TYPES_NEST = [
     ]]
 ];
 
-Config.ENEMY_TYPES_NEST_2 = [
+Config.enemy_types_nest_2 = [
         [9, [
             [1, 'runner']
         ]],
@@ -102,7 +102,7 @@ Config.ENEMY_TYPES_NEST_2 = [
     ];
 
 
-Config.ENEMY_TYPES_NEST_3 = [
+Config.enemy_types_nest_3 = [
         [10, [
             [4, 'guard'], [2, 'splitterHexagon'], [1, 'disruptor']
         ]],
@@ -111,25 +111,25 @@ Config.ENEMY_TYPES_NEST_3 = [
         ]]
     ];
 
-Config.FOOD_TYPES_NESTS = [Config.FOOD_TYPES_NEST, Config.FOOD_TYPES_NEST_2, Config.FOOD_TYPES_NEST_3]
-Config.ENEMY_TYPES_NESTS = [Config.ENEMY_TYPES_NEST, Config.ENEMY_TYPES_NEST_2, Config.ENEMY_TYPES_NEST_3];
+Config.food_types_nests = [Config.food_types_nest, Config.food_types_nest_2, Config.food_types_nest_3]
+Config.enemy_types_nests = [Config.enemy_types_nest, Config.enemy_types_nest_2, Config.enemy_types_nest_3];
 
 function getFoodTypeNest() {
-    return Config.FOOD_TYPES_NESTS[Config.NEST_TYPE];
+    return Config.food_types_nests[Config.nest_type];
 }
 function getEnemyTypeNest() {
-    return Config.ENEMY_TYPES_NESTS[Config.NEST_TYPE];
+    return Config.enemy_types_nests[Config.nest_type];
 }
 
 function convert(converted, gameManager) {
     if(converted == undefined) {
         return;
     }
-    convert2(converted, Config.NESTS_CONVERT[Config.NEST_TYPE]);
+    convert2(converted, Config.nests_convert[Config.nest_type]);
 }
 
 
-Config.NEST_CONVERT = {
+Config.nest_convert = {
     hexagon: 'pentagon',
     betaHexagon: 'betaPentagon',
     alphaHexagon: 'alphaPentagon',
@@ -137,7 +137,7 @@ Config.NEST_CONVERT = {
     betaHeptagon: 'betaPentagon',
     alphaHeptagon: 'alphaPentagon'
 };
-Config.NEST_CONVERT_2 = {
+Config.nest_convert_2 = {
     pentagon: 'hexagon',
     betaPentagon: 'betaHexagon',
     alphaPentagon: 'alphaHexagon',
@@ -145,7 +145,7 @@ Config.NEST_CONVERT_2 = {
     betaHeptagon: 'betaHexagon',
     alphaHeptagon: 'alphaHexagon'
 };
-Config.NEST_CONVERT_3 = {
+Config.nest_convert_3 = {
     pentagon: 'heptagon',
     betaPentagon: 'betaHeptagon',
     alphaPentagon: 'alphaHeptagon',
@@ -153,7 +153,7 @@ Config.NEST_CONVERT_3 = {
     betaHexagon: 'betaHeptagon',
     alphaHexagon: 'alphaHeptagon'
 };
-Config.NESTS_CONVERT = [Config.NEST_CONVERT, Config.NEST_CONVERT_2, Config.NEST_CONVERT_3]
+Config.nests_convert = [Config.nest_convert, Config.nest_convert_2, Config.nest_convert_3]
 
 function convert2(converted, conversion) {
     if(conversion.hasOwnProperty(converted.defs[0])) {
@@ -174,7 +174,7 @@ let pickFromChanceSet = set => {
     return set;
 }
 
-Config.NEST_COLORS = ["purple", "hexagon", "#f0ba77"];
+Config.nest_colors = ["purple", "hexagon", "#f0ba77"];
 
 function nestConvert(tile) {
     let entity = ran.choose(tile.entities);
@@ -183,12 +183,12 @@ function nestConvert(tile) {
 }
 
 
-Config.FOOD_CAPS_NEST = [15, 14, 12]; // Max nest food per nest.
-Config.FOOD_SPAWN_CHANCES_NEST = [1, 0.9, 0.7]; // Likeliness of nest food spawn attempts succeeding.
+Config.food_caps_nest = [15, 14, 12]; // Max nest food per nest.
+Config.food_spawn_chances_nest = [1, 0.9, 0.7]; // Likeliness of nest food spawn attempts succeeding.
 //Config.FOOD_SPAWN_COOLDOWN_NEST = [45, 45, 45]; // Cooldown (in game ticks) of nest food spawn attempts being made.
 
-Config.ENEMY_CAPS_NEST = [20, 20, 8]; // Max nest enemies per nest.
-Config.ENEMY_SPAWN_CHANCES_NEST = [1/3,1/3,1/6], // Likeliness of nest enemies spawn attempts succeeding.
+Config.enemy_caps_nest = [10, 10, 5]; // Max nest enemies per nest.
+Config.enemy_spawn_chances_nest = [1/3,1/3,1/6], // Likeliness of nest enemies spawn attempts succeeding.
 //Config.ENEMY_SPAWN_COOLDOWN_NEST = [60,60,60], // Cooldown (in game ticks) of nest enemies spawn attempts being made.
 
 
@@ -234,17 +234,17 @@ foodloop2 = function() {
     // Nest food/enemy spawn
     if (Math.random() < 1 / 3 && global.gameManager.room.spawnable[TEAM_ENEMIES]) {
         // Enemy spawn
-        if (Math.random() < Config.ENEMY_SPAWN_CHANCE_NEST && this.enemyFoods.length < Config.ENEMY_CAP_NEST) {
+        if (Math.random() < Config.enemy_spawn_chance_nest && this.enemyFoods.length < Config.enemy_cap_nest) {
             const tile = ran.choose(global.gameManager.room.spawnable[TEAM_ENEMIES]).randomInside();
-            const o = spawnFoodEntity(tile, Config.ENEMY_TYPES_NEST);
+            const o = spawnFoodEntity(tile, Config.enemy_types_nest);
             this.enemyFoods.push(o);
             setupCleanup(this.enemyFoods, o);
         }
         // Nest food spawn
-        if (Math.random() < Config.FOOD_SPAWN_CHANCE_NEST && this.nestFoods.length < Config.FOOD_CAP_NEST) {
+        if (Math.random() < Config.food_spawn_chance_nest && this.nestFoods.length < Config.food_cap_nest) {
             const tile = ran.choose(global.gameManager.room.spawnable[TEAM_ENEMIES]).randomInside();
             for (let i = 0; i < totalFoods; i++) {
-                const o = spawnFoodEntity(tile, Config.FOOD_TYPES_NEST);
+                const o = spawnFoodEntity(tile, Config.food_types_nest);
                 this.nestFoods.push(o);
                 setupCleanup(this.nestFoods, o);
             }
