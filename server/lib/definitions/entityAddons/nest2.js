@@ -571,7 +571,7 @@ Class.nest2_genericBarracks = {
         FOV: 0.5,
         SPEED: 0.1 * base.SPEED,
         ACCELERATION: 1.4,
-        HEALTH: 2 * base.HEALTH,
+        HEALTH: 1.5 * base.HEALTH,
         DAMAGE: base.DAMAGE,
         PENETRATION: 2,
         PUSHABILITY: 0.25,
@@ -633,7 +633,7 @@ Class.nest2_genericSoldier = {
         FOV: 0.5,
         SPEED: 0.1 * base.SPEED,
         ACCELERATION: 1.4,
-        HEALTH: 1.25 * base.HEALTH,
+        HEALTH: 1 * base.HEALTH,
         DAMAGE: base.DAMAGE,
         PENETRATION: 2,
         PUSHABILITY: 0.25,
@@ -903,7 +903,7 @@ Class.eliteRunner = {
         FOV: 1.25,
         SPEED: 0.5 * base.SPEED,
         ACCELERATION: 0.3,
-        HEALTH: 12 * base.HEALTH,
+        HEALTH: 4.5 * base.HEALTH,
         DAMAGE: 9 * base.DAMAGE,
         REGEN: 0.5 * base.REGEN,
     },
@@ -1036,14 +1036,14 @@ Class.eliteFighter = {
         {
             POSITION: [7, 2, 1, 9, 1, 90, 0],
             PROPERTIES: {
-                SHOOT_SETTINGS: combineStats([g.basic, g.pelleter, g.twin]),
+                SHOOT_SETTINGS: combineStats([g.basic, g.pelleter, g.twin, { health: 0.5, damage: 0.5, resist: 1.05 }]),
                 TYPE: "bullet",
             },
         },
         {
             POSITION: [7, 2, 1, 9, 6, 90, 0.5],
             PROPERTIES: {
-                SHOOT_SETTINGS: combineStats([g.basic, g.pelleter, g.twin]),
+                SHOOT_SETTINGS: combineStats([g.basic, g.pelleter, g.twin, { health: 0.5, damage: 0.5, resist: 1.05 }]),
                 TYPE: "bullet",
             },
         },
@@ -1052,14 +1052,14 @@ Class.eliteFighter = {
         }, {
             POSITION: [7, 2, 1, 9, -1, 270, 0.5],
             PROPERTIES: {
-                SHOOT_SETTINGS: combineStats([g.basic, g.pelleter, g.twin]),
+                SHOOT_SETTINGS: combineStats([g.basic, g.pelleter, g.twin, { health: 0.5, damage: 0.5, resist: 1.05 }]),
                 TYPE: "bullet",
             },
         },
         {
             POSITION: [7, 2, 1, 9, -6, 270, 0],
             PROPERTIES: {
-                SHOOT_SETTINGS: combineStats([g.basic, g.pelleter, g.twin]),
+                SHOOT_SETTINGS: combineStats([g.basic, g.pelleter, g.twin, { health: 0.5, damage: 0.5, resist: 1.05 }]),
                 TYPE: "bullet",
             },
         },
@@ -1068,14 +1068,14 @@ Class.eliteFighter = {
         }, {
             POSITION: [7, 2, 1, 9, 2.5, 0, 0.5],
             PROPERTIES: {
-                SHOOT_SETTINGS: combineStats([g.basic, g.pelleter, g.twin]),
+                SHOOT_SETTINGS: combineStats([g.basic, g.pelleter, g.twin, { health: 0.5, damage: 0.5, resist: 1.05 }]),
                 TYPE: "bullet",
             },
         },
         {
             POSITION: [7, 2, 1, 9, -2.5, 0, 0],
             PROPERTIES: {
-                SHOOT_SETTINGS: combineStats([g.basic, g.pelleter, g.twin]),
+                SHOOT_SETTINGS: combineStats([g.basic, g.pelleter, g.twin, { health: 0.5, damage: 0.5, resist: 1.05 }]),
                 TYPE: "bullet",
             },
         },
