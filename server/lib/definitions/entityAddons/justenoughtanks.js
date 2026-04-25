@@ -601,7 +601,7 @@ Class.jetLongshot = {
         {
             POSITION: [14, 10, 1.3, 8, 0, 0, 0],
             PROPERTIES: {
-                SHOOT_SETTINGS: combineStats([g.basic, g.machineGun, g.focal]),
+                SHOOT_SETTINGS: combineStats([g.basic, g.machineGun, g.gatlingGun]),
                 TYPE: "bullet",
             },
         },
@@ -620,7 +620,7 @@ Class.jetLongGunner = {
                     g.basic,
                     g.twin,
                     g.gunner,
-                    g.focal,
+                    g.gatlingGun,
                     { maxSpeed: 1.2, speed: 1.5, spray: 0.5 },
                 ]),
                 TYPE: "bullet",
@@ -633,7 +633,7 @@ Class.jetLongGunner = {
                     g.basic,
                     g.twin,
                     g.gunner,
-                    g.focal,
+                    g.gatlingGun,
                     { maxSpeed: 1.2, speed: 1.5, spray: 0.5 },
                 ]),
                 TYPE: "bullet",
@@ -646,7 +646,7 @@ Class.jetLongGunner = {
                     g.basic,
                     g.twin,
                     g.gunner,
-                    g.focal,
+                    g.gatlingGun,
                     { maxSpeed: 1.2, speed: 1.5, spray: 0.5 },
                 ]),
                 TYPE: "bullet",
@@ -659,7 +659,7 @@ Class.jetLongGunner = {
                     g.basic,
                     g.twin,
                     g.gunner,
-                    g.focal,
+                    g.gatlingGun,
                     { maxSpeed: 1.2, speed: 1.5, spray: 0.5 },
                 ]),
                 TYPE: "bullet",
@@ -685,7 +685,7 @@ Class.jetMachineRifle = {
                 SHOOT_SETTINGS: combineStats([
                     g.basic,
                     g.machineGun,
-                    g.focal,
+                    g.gatlingGun,
                     g2.machineRifle,
                 ]),
                 TYPE: "bullet",
@@ -1007,7 +1007,7 @@ Class.jetSilo = {
     TURRETS: [
         {
             POSITION: [9, 0, 0, 0, 360, 1],
-            TYPE: "mendersymbol",
+            TYPE: "triangleHat",
         },
     ],
     GUNS: weaponArray(
@@ -1064,7 +1064,7 @@ Class.jetTwinSpawner = {
             POSITION: [1, 12, 1, 15.5, 0, 0, 0],
             PROPERTIES: {
                 MAX_CHILDREN: 4,
-                SHOOT_SETTINGS: combineStats([g.factory, g.babyfactory]),
+                SHOOT_SETTINGS: combineStats([g.minion, g.spawner]),
                 TYPE: "twinMinion",
                 STAT_CALCULATOR: "drone",
                 AUTOFIRE: true,
@@ -1438,127 +1438,104 @@ for (let i = 0; i < 10; i++) {
 
 
 
-// Tier 1
-Class.desmos = {
-    PARENT: "genericTank",
-    LABEL: "Desmos",
-    STAT_NAMES: statnames.desmos,
-    GUNS: [
-        {
-            POSITION: [20, 8, -4 / 3, 0, 0, 0, 0],
-            PROPERTIES: {
-                SHOOT_SETTINGS: combineStats([g.basic, g2.desmos]),
-                TYPE: ["bullet", { CONTROLLERS: ['snake'] }]
-            }
-        },
-        ...weaponMirror({
-            POSITION: [3.75, 10, 2.125, 1.5, -6.25, 90, 0]
-        })
-    ]
-};
 
-Class.helix = {
-    PARENT: "genericTank",
-    LABEL: "Helix",
-    DANGER: 6,
-    STAT_NAMES: statnames.desmos,
-    GUNS: [
-        {
-            POSITION: [20, 6, -4 / 3, 0, -5, 0, 0],
-            PROPERTIES: {
-                SHOOT_SETTINGS: combineStats([g.basic, g.twin, g2.desmos]),
-                TYPE: ["bullet", { CONTROLLERS: ['snake'] }]
-            },
-        },
-        {
-            POSITION: [20, 6, -4 / 3, 0, 5, 0, 0],
-            PROPERTIES: {
-                SHOOT_SETTINGS: combineStats([g.basic, g.twin, g2.desmos]),
-                TYPE: ["bullet", { CONTROLLERS: [['snake', { invert: true }]] }]
-            },
-        },
-        ...weaponMirror({
-            POSITION: [3.625, 7.5, 2.75, 5.75, -6.75, 90, 0],
-        }),
-        {
-            POSITION: [6, 8, 0.25, 10.5, 0, 0, 0],
-        },
-    ],
-};
+Class.desmos.GUNS = [
+    {
+        POSITION: [20, 8, -4 / 3, 0, 0, 0, 0],
+        PROPERTIES: {
+            SHOOT_SETTINGS: combineStats([g.basic, g2.desmos]),
+            TYPE: ["bullet", { CONTROLLERS: ['snake'] }]
+        }
+    },
+    ...weaponMirror({
+        POSITION: [3.75, 10, 2.125, 1.5, -6.25, 90, 0]
+    })
+];
 
-Class.quadruplex = {
-    PARENT: "genericTank",
-    LABEL: "Quadruplex",
-    DANGER: 7,
-    STAT_NAMES: statnames.desmos,
-    GUNS: [
-        {
-            POSITION: [20, 8, -4 / 3, 0, 0, 45, 0],
-            PROPERTIES: {
-                SHOOT_SETTINGS: combineStats([g.basic, g2.desmos, g.twin, { reload: 1.5 }]),
-                TYPE: ["bullet", { CONTROLLERS: [['snake', { invert: true, amplitude: 180, yOffset: -200 }]] }]
-            }
+Class.helix.GUNS = [
+    {
+        POSITION: [20, 6, -4 / 3, 0, -5, 0, 0],
+        PROPERTIES: {
+            SHOOT_SETTINGS: combineStats([g.basic, g.twin, g2.desmos]),
+            TYPE: ["bullet", { CONTROLLERS: ['snake'] }]
         },
-        {
-            POSITION: [20, 8, -4 / 3, 0, 0, -135, 0],
-            PROPERTIES: {
-                SHOOT_SETTINGS: combineStats([g.basic, g2.desmos, g.twin, { reload: 1.5 }]),
-                TYPE: ["bullet", { CONTROLLERS: [['snake', { invert: true, amplitude: 180, yOffset: 100 }]] }]
-            }
+    },
+    {
+        POSITION: [20, 6, -4 / 3, 0, 5, 0, 0],
+        PROPERTIES: {
+            SHOOT_SETTINGS: combineStats([g.basic, g.twin, g2.desmos]),
+            TYPE: ["bullet", { CONTROLLERS: [['snake', { invert: true }]] }]
         },
-        {
-            POSITION: [20, 8, -4 / 3, 0, 0, -45, 0],
-            PROPERTIES: {
-                SHOOT_SETTINGS: combineStats([g.basic, g2.desmos, g.twin, { reload: 1.5 }]),
-                TYPE: ["bullet", { CONTROLLERS: [['snake', { invert: false, amplitude: 180, yOffset: 200 }]] }]
-            }
-        },
-        {
-            POSITION: [20, 8, -4 / 3, 0, 0, 135, 0],
-            PROPERTIES: {
-                SHOOT_SETTINGS: combineStats([g.basic, g2.desmos, g.twin, { reload: 1.5 }]),
-                TYPE: ["bullet", { CONTROLLERS: [['snake', { invert: false, amplitude: 180, yOffset: -100 }]] }]
-            }
-        },
-        ...weaponArray(weaponMirror({
-            POSITION: [3.75, 10, 2.125, 1.5, 6.25, 45, 0]
-        }), 4)
-    ]
-};
+    },
+    ...weaponMirror({
+        POSITION: [3.625, 7.5, 2.75, 5.75, -6.75, 90, 0],
+    }),
+    {
+        POSITION: [6, 8, 0.25, 10.5, 0, 0, 0],
+    },
+];
+
+Class.quadruplex.GUNS = [
+    {
+        POSITION: [20, 8, -4 / 3, 0, 0, 45, 0],
+        PROPERTIES: {
+            SHOOT_SETTINGS: combineStats([g.basic, g2.desmos, g.twin, { reload: 1.5 }]),
+            TYPE: ["bullet", { CONTROLLERS: [['snake', { invert: true, amplitude: 180, yOffset: -200 }]] }]
+        }
+    },
+    {
+        POSITION: [20, 8, -4 / 3, 0, 0, -135, 0],
+        PROPERTIES: {
+            SHOOT_SETTINGS: combineStats([g.basic, g2.desmos, g.twin, { reload: 1.5 }]),
+            TYPE: ["bullet", { CONTROLLERS: [['snake', { invert: true, amplitude: 180, yOffset: 100 }]] }]
+        }
+    },
+    {
+        POSITION: [20, 8, -4 / 3, 0, 0, -45, 0],
+        PROPERTIES: {
+            SHOOT_SETTINGS: combineStats([g.basic, g2.desmos, g.twin, { reload: 1.5 }]),
+            TYPE: ["bullet", { CONTROLLERS: [['snake', { invert: false, amplitude: 180, yOffset: 200 }]] }]
+        }
+    },
+    {
+        POSITION: [20, 8, -4 / 3, 0, 0, 135, 0],
+        PROPERTIES: {
+            SHOOT_SETTINGS: combineStats([g.basic, g2.desmos, g.twin, { reload: 1.5 }]),
+            TYPE: ["bullet", { CONTROLLERS: [['snake', { invert: false, amplitude: 180, yOffset: -100 }]] }]
+        }
+    },
+    ...weaponArray(weaponMirror({
+        POSITION: [3.75, 10, 2.125, 1.5, 6.25, 45, 0]
+    }), 4)
+];
 
 
-Class.triplex = {
-    PARENT: "genericTank",
-    LABEL: "Triplex",
-    DANGER: 7,
-    STAT_NAMES: statnames.desmos,
-    GUNS: [
-        {
-            POSITION: [18, 7, -4 / 3, 0, 0, 0, 0],
-            PROPERTIES: {
-                SHOOT_SETTINGS: combineStats([g.basic, g.twin, g.tripleShot]),
-                TYPE: "bullet",
-            },
+Class.triplex.GUNS = [
+    {
+        POSITION: [18, 7, -4 / 3, 0, 0, 0, 0],
+        PROPERTIES: {
+            SHOOT_SETTINGS: combineStats([g.basic, g.twin, g.tripleShot]),
+            TYPE: "bullet",
         },
-        {
-            POSITION: [18, 7, -4 / 3, 0, 0, 45, 0.5],
-            PROPERTIES: {
-                SHOOT_SETTINGS: combineStats([g.basic, g.twin, g.tripleShot, g2.desmos]),
-                TYPE: ["bullet", { CONTROLLERS: [['snake', { invert: true, amplitude: 180, yOffset: -200 }]] }]
-            },
+    },
+    {
+        POSITION: [18, 7, -4 / 3, 0, 0, 45, 0.5],
+        PROPERTIES: {
+            SHOOT_SETTINGS: combineStats([g.basic, g.twin, g.tripleShot, g2.desmos]),
+            TYPE: ["bullet", { CONTROLLERS: [['snake', { invert: true, amplitude: 180, yOffset: -200 }]] }]
         },
-        {
-            POSITION: [18, 7, -4 / 3, 0, 0, -45, 0.5],
-            PROPERTIES: {
-                SHOOT_SETTINGS: combineStats([g.basic, g.twin, g.tripleShot, g2.desmos]),
-                TYPE: ["bullet", { CONTROLLERS: [['snake', { amplitude: 180, yOffset: 200 }]] }]
-            },
+    },
+    {
+        POSITION: [18, 7, -4 / 3, 0, 0, -45, 0.5],
+        PROPERTIES: {
+            SHOOT_SETTINGS: combineStats([g.basic, g.twin, g.tripleShot, g2.desmos]),
+            TYPE: ["bullet", { CONTROLLERS: [['snake', { amplitude: 180, yOffset: 200 }]] }]
         },
-        ...weaponMirror([{
-            POSITION: [3.75, 10, 2.125, 1, 4.25, -10, 0]
-        },
-        {
-            POSITION: [5, 6, 0.5, 10.5, 0, 22.5, 0]
-        }]),
-    ]
-};
+    },
+    ...weaponMirror([{
+        POSITION: [3.75, 10, 2.125, 1, 4.25, -10, 0]
+    },
+    {
+        POSITION: [5, 6, 0.5, 10.5, 0, 22.5, 0]
+    }]),
+];
