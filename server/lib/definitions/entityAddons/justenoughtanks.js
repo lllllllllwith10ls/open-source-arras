@@ -13,6 +13,7 @@ const {
     makeGuard,
     makeBird,
     makeRadialAuto,
+    makeFlank,
     weaponArray,
     weaponMirror,
     makeAura,
@@ -106,12 +107,37 @@ Class.jetFusion = makeOver("pounder", "Fusion", {
     maxDrones: 2,
     angle: 90,
 });
-Class.jetChimera = makeOver("pounder", "Chimera", {
-    spawnerType: "swarm",
-    count: 1,
-    independent: true,
-});
-
+Class.jetChimera = {
+    PARENT: 'genericTank',
+    LABEL: "Chimera",
+    GUNS: [
+        {
+            POSITION: {
+                LENGTH: 20.5,
+                WIDTH: 12
+            },
+            PROPERTIES: {
+                SHOOT_SETTINGS: combineStats([g.basic, g.pounder]),
+                TYPE: 'bullet'
+            }
+        },
+        ...weaponMirror({
+            POSITION: {
+                LENGTH: 9,
+                WIDTH: 8.2,
+                ASPECT: 0.6,
+                X: 5,
+                Y: 4,
+                ANGLE: 180
+            },
+            PROPERTIES: {
+                SHOOT_SETTINGS: combineStats([g.swarm]),
+                TYPE: 'autoswarm',
+                STAT_CALCULATOR: 'swarm'
+            }
+        }, { delayIncrement: 0.5 })
+    ]
+};
 Class.jetNimrod = {
     PARENT: "genericTank",
     LABEL: "Nimrod",
@@ -599,7 +625,12 @@ Class.jetLongshot = {
     DANGER: 6,
     GUNS: [
         {
-            POSITION: [14, 10, 1.3, 8, 0, 0, 0],
+            POSITION: {
+                LENGTH: 14,
+                WIDTH: 9.5,
+                ASPECT: 1.25,
+                X: 8
+            },
             PROPERTIES: {
                 SHOOT_SETTINGS: combineStats([g.basic, g.machineGun, g.gatlingGun]),
                 TYPE: "bullet",
@@ -995,6 +1026,56 @@ Class.jetBattery = {
     ],
 };
 
+
+Class.jetWeld = makeFlank('basic', 3, "Weld", {extraStats: [g.flankGuard], danger: 7})
+Class.jetWeld.BODY = { SPEED: 1.1 * base.SPEED }
+Class.jetWeld.TURRETS = weaponArray({
+    TYPE: "autoTankGun",
+    POSITION: {
+        SIZE: 11,
+        X: 8,
+        ANGLE: 180,
+        ARC: 90,
+        LAYER: 0
+    }
+}, 3);
+
+Class.jetQuadriLateral = {
+    PARENT: 'genericTank',
+    LABEL: "Quadri-Lateral",
+    DANGER: 7,
+    BODY: {
+        DENSITY: 0.6 * base.DENSITY
+    },
+    GUNS: [
+        ...weaponMirror({
+            POSITION: {
+                LENGTH: 16,
+                WIDTH: 8,
+                ANGLE: 150,
+                DELAY: 0.1
+            },
+            PROPERTIES: {
+                SHOOT_SETTINGS: combineStats([g.basic, g.flankGuard, g.triAngle, g.thruster]),
+                TYPE: 'bullet',
+                LABEL: "Thruster"
+            }
+        })
+    ],
+    TURRETS: [
+        ...weaponMirror({
+            TYPE: ["autoTankGun", { GUN_STAT_SCALE: g.flankGuard, HAS_NO_RECOIL: true }],
+            POSITION: {
+                SIZE: 11,
+                X: 8,
+                ANGLE: 45,
+                ARC: 190,
+                LAYER: 0
+            }
+        })
+    ]
+}
+
 Class.jetSilo = {
     PARENT: "genericTank",
     LABEL: "Silo",
@@ -1007,7 +1088,7 @@ Class.jetSilo = {
     TURRETS: [
         {
             POSITION: [9, 0, 0, 0, 360, 1],
-            TYPE: "triangleHat",
+            TYPE: ["triangleHat", { COLOR: "grey" }],
         },
     ],
     GUNS: weaponArray(
@@ -1235,64 +1316,36 @@ Class.jetGodhead = {
 // Class.twin.UPGRADES_TIER_2.splice(Class.twin.UPGRADES_TIER_2.indexOf("helix"),1);
 // Class.flankGuard.UPGRADES_TIER_3.splice(Class.flankGuard.UPGRADES_TIER_3.indexOf("quadruplex"),1);
 // Class.tripleShot.UPGRADES_TIER_3.splice(Class.tripleShot.UPGRADES_TIER_3.indexOf("triplex"),1);
-Class.sniper.UPGRADES_TIER_2.splice(
-    Class.sniper.UPGRADES_TIER_2.indexOf("marksman"),
-    1,
-);
-Class.sniper.UPGRADES_TIER_3.splice(
-    Class.sniper.UPGRADES_TIER_3.indexOf("railgun"),
-    1,
-);
-Class.rifle.UPGRADES_TIER_3.splice(
-    Class.sniper.UPGRADES_TIER_3.indexOf("revolver"),
-    1,
-);
-Class.hunter.UPGRADES_TIER_3.splice(
-    Class.hunter.UPGRADES_TIER_3.indexOf("nimrod"),
-    1,
-);
-Class.assassin.UPGRADES_TIER_3.splice(
-    Class.assassin.UPGRADES_TIER_3.indexOf("deadeye"),
-    1,
-);
-Class.assassin.UPGRADES_TIER_3.splice(
-    Class.assassin.UPGRADES_TIER_3.indexOf("single"),
-    1,
-);
-Class.spawner.UPGRADES_TIER_3.splice(
-    Class.spawner.UPGRADES_TIER_3.indexOf("ranch"),
-    1,
-);
-Class.auto3.UPGRADES_TIER_3.splice(
-    Class.auto3.UPGRADES_TIER_3.indexOf("whirl3"),
-    1,
-);
-Class.trapGuard.UPGRADES_TIER_3.splice(
-    Class.trapGuard.UPGRADES_TIER_3.indexOf("whirlGuard"),
-    1,
-);
-Class.hexaTank.UPGRADES_TIER_3.splice(
-    Class.hexaTank.UPGRADES_TIER_3.indexOf("hexaWhirl"),
-    1,
-);
-Class.artillery.UPGRADES_TIER_3.splice(
-    Class.artillery.UPGRADES_TIER_3.indexOf("munition"),
-    1,
-);
-Class.launcher.UPGRADES_TIER_3.splice(
-    Class.launcher.UPGRADES_TIER_3.indexOf("vortex"),
-    1,
-);
-Class.underseer.UPGRADES_TIER_3.splice(
-    Class.underseer.UPGRADES_TIER_3.indexOf("prophet"),
-    1,
-);
+if (Class.sniper.UPGRADES_TIER_2.indexOf("marksman") >= 0)
+    Class.sniper.UPGRADES_TIER_2.splice(Class.sniper.UPGRADES_TIER_2.indexOf("marksman"), 1);
+if (Class.sniper.UPGRADES_TIER_3.indexOf("railgun") >= 0)
+    Class.sniper.UPGRADES_TIER_3.splice(Class.sniper.UPGRADES_TIER_3.indexOf("railgun"), 1);
+if (Class.rifle.UPGRADES_TIER_3.indexOf("revolver") >= 0)
+    Class.rifle.UPGRADES_TIER_3.splice(Class.rifle.UPGRADES_TIER_3.indexOf("revolver"), 1);
+if (Class.hunter.UPGRADES_TIER_3.indexOf("nimrod") >= 0)
+    Class.hunter.UPGRADES_TIER_3.splice(Class.hunter.UPGRADES_TIER_3.indexOf("nimrod"), 1);
+if (Class.assassin.UPGRADES_TIER_3.indexOf("deadeye") >= 0)
+    Class.assassin.UPGRADES_TIER_3.splice(Class.assassin.UPGRADES_TIER_3.indexOf("deadeye"), 1);
+if (Class.assassin.UPGRADES_TIER_3.indexOf("single") >= 0)
+    Class.assassin.UPGRADES_TIER_3.splice(Class.assassin.UPGRADES_TIER_3.indexOf("single"), 1);
+if (Class.spawner.UPGRADES_TIER_3.indexOf("ranch") >= 0)
+    Class.spawner.UPGRADES_TIER_3.splice(Class.spawner.UPGRADES_TIER_3.indexOf("ranch"), 1);
+if (Class.auto3.UPGRADES_TIER_3.indexOf("whirl3") >= 0)
+    Class.auto3.UPGRADES_TIER_3.splice(Class.auto3.UPGRADES_TIER_3.indexOf("whirl3"), 1);
+if (Class.trapGuard.UPGRADES_TIER_3.indexOf("whirlGuard") >= 0)
+    Class.trapGuard.UPGRADES_TIER_3.splice(Class.trapGuard.UPGRADES_TIER_3.indexOf("whirlGuard"), 1);
+if (Class.hexaTank.UPGRADES_TIER_3.indexOf("hexaWhirl") >= 0)
+    Class.hexaTank.UPGRADES_TIER_3.splice(Class.hexaTank.UPGRADES_TIER_3.indexOf("hexaWhirl"), 1);
+if (Class.artillery.UPGRADES_TIER_3.indexOf("munition") >= 0)
+    Class.artillery.UPGRADES_TIER_3.splice(Class.artillery.UPGRADES_TIER_3.indexOf("munition"), 1);
+if (Class.launcher.UPGRADES_TIER_3.indexOf("vortex") >= 0)
+    Class.launcher.UPGRADES_TIER_3.splice(Class.launcher.UPGRADES_TIER_3.indexOf("vortex"), 1);
+if (Class.underseer.UPGRADES_TIER_3.indexOf("prophet") >= 0)
+    Class.underseer.UPGRADES_TIER_3.splice(Class.underseer.UPGRADES_TIER_3.indexOf("prophet"), 1);
+if (Class.smasher.UPGRADES_TIER_3.indexOf("cocci") >= 0)
+    Class.smasher.UPGRADES_TIER_3.splice(Class.smasher.UPGRADES_TIER_3.indexOf("cocci"), 1);
 if (!Class.basic.UPGRADES_TIER_3) Class.basic.UPGRADES_TIER_3 = [];
 Class.basic.UPGRADES_TIER_3.push("single");
-Class.smasher.UPGRADES_TIER_3.splice(
-    Class.smasher.UPGRADES_TIER_3.indexOf("cocci"),
-    1,
-);
 
 Class.machineGun.UPGRADES_TIER_2.push("jetLongshot", "jetTorrent");
 if (!Class.machineGun.UPGRADES_TIER_3) Class.machineGun.UPGRADES_TIER_3 = [];
@@ -1327,7 +1380,9 @@ Class.jetLongshot.UPGRADES_TIER_3 = [
     "jetLongGunner",
     "jetMachineRifle",
 ];
-Class.hexaTank.UPGRADES_TIER_3.push("jetHexaMachineGun", "jetBurst");
+Class.hexaTank.UPGRADES_TIER_3.push("jetHexaMachineGun", "jetBurst", "jetWeld");
+Class.auto3.UPGRADES_TIER_3.push("jetWeld", "jetQuadriLateral");
+Class.triAngle.UPGRADES_TIER_3.push("jetQuadriLateral");
 Class.jetTorrent.UPGRADES_TIER_3 = ["jetCascade", "jetSplasher", "jetSoaker"];
 Class.sprayer.UPGRADES_TIER_3.push("jetSplasher");
 Class.overseer.UPGRADES_TIER_3.push("jetSilo");
@@ -1347,7 +1402,7 @@ while (next.length && limit--) {
     next = [];
     for (let i = 0; i < current.length; i++) {
         // Handle string definition references.
-        let now = ensureIsClass(current[i]);
+        let now = structuredClone(ensureIsClass(current[i]));
 
         // Handles tanks with multiple ways to upgrade to them, like diep.io's Streamliner.
         if (alreadySeen.includes(now.LABEL)) continue;
@@ -1355,7 +1410,14 @@ while (next.length && limit--) {
 
         // Add guns, turrets and additional max child count to our current list of stuff for our abomination to have.
         if (now.MAX_CHILDREN) MAX_CHILDREN += now.MAX_CHILDREN;
-        if (now.GUNS) GUNS.push(...now.GUNS);
+        if (now.GUNS) {
+            for (let j = 0; j < now.GUNS.length; j++) {
+                if (!now.MAX_CHILDREN && now.GUNS[j].PROPERTIES && !now.GUNS[j].PROPERTIES.MAX_CHILDREN) {
+                    now.GUNS[j].PROPERTIES.MAX_CHILDREN = Infinity;
+                }
+            }
+            GUNS.push(...now.GUNS);
+        }
         if (now.TURRETS) TURRETS.push(...now.TURRETS);
 
         // Add upgrades of current tank to next iteration
@@ -1363,7 +1425,9 @@ while (next.length && limit--) {
             if (key.startsWith("UPGRADES_TIER_")) next.push(...now[key]);
     }
 }
-
+for (let i = 0; i < alreadySeen.length; i++) {
+    console.log(alreadySeen[i]);
+}
 // This adds the tank to the definitions and to the fun menu
 Class.jetAbomination = {
     PARENT: "genericTank",
