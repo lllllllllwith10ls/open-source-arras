@@ -12,7 +12,7 @@ class Canvas {
         this.socket = global.socket;
         this.directions = [];
         this.chatListener = function(id, event) {
-            if (![global.KEY_ENTER, global.KEY_ESC].includes(event.keyCode)) return;
+            if (!["Enter", "Escape"].includes(event.code)) return;
             this[id].blur();
             this.cv.focus();
             global.showChat = false;
@@ -20,14 +20,14 @@ class Canvas {
                 if (!this.chatBox.loadedProperly) this.chatBox.remove(), this.chatInput.remove(), this.chatBox = false;
             }, 50)
             if (!this[id].value) return;
-            if (event.keyCode === global.KEY_ENTER) this.socket.talk('M', this[id].value);
+            if (event.code === "Enter") this.socket.talk("M", this[id].value);
             this[id].value = "";
         }
 
-        this.cv = document.getElementById('gameCanvas');
-        this.cvb = document.getElementById('gameCanvas-background');
-        this.cvg = document.getElementById('gameCanvas-gameplay');
-        this.cvu = document.getElementById('gameCanvas-gui');
+        this.cv = document.getElementById("gameCanvas");
+        this.cvb = document.getElementById("gameCanvas-background");
+        this.cvg = document.getElementById("gameCanvas-gameplay");
+        this.cvu = document.getElementById("gameCanvas-gui");
         this.cv.resize = (width, height) => {
             this.cv.width = this.cvb.width = this.cvg.width = this.cvu.width = this.width = width;
             this.cv.height = this.cvb.height = this.cvg.height = this.cvu.height = this.height = height;
@@ -41,7 +41,7 @@ class Canvas {
         this.treeScrollSpeedMultiplier = 1;
         this.initalized = false;
         this.tankTreeProps = {
-            searchQuery: '',
+            searchQuery: "",
             enabled: false,
         }
         global.canvas = this;
@@ -78,7 +78,7 @@ class Canvas {
     }
 
     wheel(event) {
-        if (!global.died && global.showTree) {
+        if (global.showTree) {
             if (event.deltaY > 1) {
                 global.targetTreeScale = Math.max(global.targetTreeScale / 1.2, 0.5);
             } else {
@@ -87,11 +87,11 @@ class Canvas {
         }
     }
     keyPress(event) {
-        switch (event.keyCode) {
-            case global.KEY_ZOOM_OUT:
+        switch (event.code) {
+            case "Minus":
                 if (!global.died && global.showTree) global.targetTreeScale = Math.max(global.targetTreeScale / 1.2, 0.5);
                 break;
-            case global.KEY_ZOOM_IN:
+            case "Equal":
                 if (!global.died && global.showTree) global.targetTreeScale = Math.min(global.targetTreeScale * 1.2, 8);
                 break;
         }
@@ -106,7 +106,7 @@ class Canvas {
             this.chatInput = document.createElement("input");
             this.chatInput.id = "chatInput";
             this.chatInput.style.zIndex = 11;
-            this.chatInput.addEventListener('keydown', event => this.chatListener("chatInput", event));
+            this.chatInput.addEventListener("keydown", event => this.chatListener("chatInput", event));
             document.getElementById("gameAreaWrapper").appendChild(this.chatInput);
         }
         this.chatInput.focus();
@@ -115,7 +115,7 @@ class Canvas {
 
     respawn() {
         if (global.died && !global.cannotRespawn) {
-            this.socket.talk('s', global.playerName, 0, 1 * config.game.autoLevelUp, false, 1 * config.game.incognitoMode);
+            this.socket.talk("s", global.playerName, 0, 1 * config.game.autoLevelUp, false, 1 * config.game.incognitoMode);
             global.died = false;
         }
     }
@@ -124,7 +124,38 @@ class Canvas {
         if (global.dailyTankAd.renderUI) return;
         if (global.specialPressed) {
             event.preventDefault();
-            if (!event.repeat) global.specialKeysPressed.push(event.keyCode);
+            let pressed = false;
+            let attributed = false;
+            let attributeKey = false;
+            for (let i = 0; i < global.KEY_ABILITIES.length; i++) {
+                let obj = global.KEY_ABILITIES[i];
+                if (global.specialKeysPressed.length && global.specialKeysPressed[0] === obj) attributed = obj;
+            }
+            if (!event.repeat) {
+                for (let obj in global) {
+                    let wrongKey = false;
+                    const thing = global[obj];
+                    if (typeof thing === "string") {
+                        if (attributed) {
+                            if (!pressed && (obj === "KEY_SPECIAL_HELP" || obj === "KEY_SPECIAL_HELP_ALT" || obj.startsWith(attributed)) && thing === event.code) {
+                                global.specialKeysPressed.push(obj);
+                                pressed = true;
+                            }
+                        } else if (!pressed && obj.startsWith("KEY_SPECIAL_") && thing === event.code) {
+                            for (let i = 0; i < global.KEY_ABILITIES.length; i++) {
+                                let obj2 = global.KEY_ABILITIES[i];
+                                if (obj.startsWith(obj2)) {
+                                    if (obj !== obj2) wrongKey = true;
+                                }
+                            }
+                            if (!wrongKey) {
+                                global.specialKeysPressed.push(obj);
+                                pressed = true; // Dont allow any other keys
+                            }
+                        }
+                    }
+                }
+            }
             this.socket.talk("#", ...global.specialKeysPressed);
             return;
         }
@@ -136,34 +167,36 @@ class Canvas {
                 this.tankTreeProps.searchQuery += event.key;
                 global.searchTankByName(this.tankTreeProps.searchQuery);
                 return;
-            } else if (event.keyCode === 8) { // Backspace
+            } else if (event.code === "Backspace") {
                 event.preventDefault();
                 this.tankTreeProps.searchQuery = this.tankTreeProps.searchQuery.slice(0, -1);
                 global.searchTankByName(this.tankTreeProps.searchQuery);
                 return;
-            } else if (event.keyCode === 27) { // Escape
+            } else if (event.code === "Escape") {
                 event.preventDefault();
-                this.tankTreeProps.searchQuery = '';
-                global.searchTankByName('');
+                this.tankTreeProps.searchQuery = "";
+                global.searchTankByName("");
                 global.searchBarActive = false;
                 return;
-            } else if (event.keyCode === global.KEY_ENTER) {
+            } else if (event.code === "Enter") {
                 event.preventDefault();
                 global.searchBarActive = false;
                 return;
             }
         }
 
-        switch (event.keyCode) {
-            case global.KEY_SHIFT:
+        switch (event.code) {
+            case "ShiftLeft":
+            case "ShiftRight":
                 if (global.showTree) this.treeScrollSpeedMultiplier = 5;
                 else this.socket.cmd.set(6, true);
                 break;
 
-            case global.KEY_ENTER:
+            case "Enter":
                 // Enter to respawn
                 if (global.died && !global.cannotRespawn) {
                     this.respawn();
+                    global.selfDestructed = false;
                     global.died = false;
                     break;
                 }
@@ -175,22 +208,22 @@ class Canvas {
                 }
                 break;
 
-            case global.KEY_UP_ARROW:
+            case "ArrowUp":
                 if (!global.died && global.showTree) return (global.classTreeDrag.isDragging = true, global.classTreeDrag.momentum.y = -this.treeScrollSpeed * this.treeScrollSpeedMultiplier);
             case global.KEY_UP:
                 this.socket.cmd.set(0, true);
                 break;
-            case global.KEY_DOWN_ARROW:
+            case "ArrowDown":
                 if (!global.died && global.showTree) return (global.classTreeDrag.isDragging = true, global.classTreeDrag.momentum.y = +this.treeScrollSpeed * this.treeScrollSpeedMultiplier);
             case global.KEY_DOWN:
                 this.socket.cmd.set(1, true);
                 break;
-            case global.KEY_LEFT_ARROW:
+            case "ArrowLeft":
                 if (!global.died && global.showTree) return (global.classTreeDrag.isDragging = true, global.classTreeDrag.momentum.x = -this.treeScrollSpeed * this.treeScrollSpeedMultiplier);
             case global.KEY_LEFT:
                 this.socket.cmd.set(2, true);
                 break;
-            case global.KEY_RIGHT_ARROW:
+            case "ArrowRight":
                 if (!global.died && global.showTree) return (global.classTreeDrag.isDragging = true, global.classTreeDrag.momentum.x = +this.treeScrollSpeed * this.treeScrollSpeedMultiplier);
             case global.KEY_RIGHT:
                 this.socket.cmd.set(3, true);
@@ -205,26 +238,20 @@ class Canvas {
                 this.socket.cmd.set(6, true);
                 break;
             case global.KEY_LEVEL_UP:
-                this.socket.talk('L');
+                this.socket.talk("L");
                 break;
-            case global.KEY_TOKEN:
-                this.socket.talk('0');
-                break;
-            case global.KEY_BECOME:
-                this.socket.talk('H');
-                break;
-            case global.KEY_MAX_STAT:
-                global.statMaxing = true;
-                break;
-            case global.KEY_BECOME:
+            case global.KEY_ABILITY:
                 this.socket.talk("H");
                 break;
+            case global.KEY_SKILL_MAX:
+                global.statMaxing = true;
+                break;
             case global.KEY_SUICIDE:
-                this.socket.talk('1');
+                this.socket.talk("1");
                 break;
         }
         if (!event.repeat) {
-            switch (event.keyCode) {
+            switch (event.code) {
                 case global.KEY_SPECIAL:
                     this.socket.talk("#");
                     global.specialPressed = true;
@@ -237,7 +264,7 @@ class Canvas {
                 case global.KEY_AUTO_FIRE:
                     this.socket.talk("t", 1, true);
                     break;
-                case global.KEY_OVER_RIDE:
+                case global.KEY_OVERRIDE:
                     this.socket.talk("t", 2, true);
                     break;
                 case global.KEY_AUTO_ALT:
@@ -246,7 +273,6 @@ class Canvas {
                 case global.KEY_SPIN_LOCK:
                     this.spinLock = !this.spinLock;
                     global.createMessage(this.spinLock ? "Spinlock enabled." : "Spinlock disabled.");
-                    this.socket.talk("t", 4, false);
                     break;
                 case global.KEY_REVERSE_MOUSE:
                     this.inverseMouse = !this.inverseMouse;
@@ -256,7 +282,7 @@ class Canvas {
                     this.reverseDirection = !this.reverseDirection;
                     global.createMessage(this.reverseDirection ? "Reverse tank enabled." : "Reverse tank disabled.");
                     break;
-                case global.KEY_DEBUG:
+                case global.KEY_PING:
                     global.showDebug = !global.showDebug;
                     break;
                 case global.KEY_CLASS_TREE:
@@ -272,67 +298,67 @@ class Canvas {
             }
             if (global.canSkill) {
                 let skill = [
-                    global.KEY_UPGRADE_ATK, global.KEY_UPGRADE_HTL, global.KEY_UPGRADE_SPD,
-                    global.KEY_UPGRADE_STR, global.KEY_UPGRADE_PEN, global.KEY_UPGRADE_DAM,
-                    global.KEY_UPGRADE_RLD, global.KEY_UPGRADE_MOB, global.KEY_UPGRADE_RGN,
-                    global.KEY_UPGRADE_SHI
-                ].indexOf(event.keyCode);
-                if (skill >= 0) this.socket.talk('x', skill, 1 * global.statMaxing);
+                    global.KEY_SKILL_1,
+                    global.KEY_SKILL_2,
+                    global.KEY_SKILL_3,
+                    global.KEY_SKILL_4,
+                    global.KEY_SKILL_5,
+                    global.KEY_SKILL_6,
+                    global.KEY_SKILL_7,
+                    global.KEY_SKILL_8,
+                    global.KEY_SKILL_9,
+                    global.KEY_SKILL_10
+                ].indexOf(event.code);
+                if (skill >= 0) this.socket.talk("x", skill, 1 * global.statMaxing);
+            }
+            const upgradeMap = {
+                [global.KEY_UPGRADE_1]: 0,
+                [global.KEY_UPGRADE_2]: 1,
+                [global.KEY_UPGRADE_3]: 2,
+                [global.KEY_UPGRADE_4]: 3,
+                [global.KEY_UPGRADE_5]: 4,
+                [global.KEY_UPGRADE_6]: 5,
+                [global.KEY_UPGRADE_7]: 6,
+                [global.KEY_UPGRADE_8]: 7,
+                [global.KEY_UPGRADE_9]: 8
             }
             if (global.canUpgrade) {
-                switch (event.keyCode) {
-                    case global.KEY_CHOOSE_1:
-                        this.socket.talk("U", 0, parseInt(gui.upgrades[0][0]));
-                        break;
-                    case global.KEY_CHOOSE_2:
-                        this.socket.talk("U", 1, parseInt(gui.upgrades[1][0]));
-                        break;
-                    case global.KEY_CHOOSE_3:
-                        this.socket.talk("U", 2, parseInt(gui.upgrades[2][0]));
-                        break;
-                    case global.KEY_CHOOSE_4:
-                        this.socket.talk("U", 3, parseInt(gui.upgrades[3][0]));
-                        break;
-                    case global.KEY_CHOOSE_5:
-                        this.socket.talk("U", 4, parseInt(gui.upgrades[4][0]));
-                        break;
-                    case global.KEY_CHOOSE_6:
-                        this.socket.talk("U", 5, parseInt(gui.upgrades[5][0]));
-                        break;
-                }
+                const i = upgradeMap[event.code];
+                if (i !== undefined) this.socket.talk("U", i, parseInt(gui.upgrades[i][0]));
             }
         }
     }
     keyUp(event) {
         if (global.dailyTankAd.renderUI) return;
-        switch (event.keyCode) {
+        switch (event.code) {
             case global.KEY_SPECIAL:
                 global.specialPressed = false;
                 global.specialKeysPressed = [];
                 break;
-            case global.KEY_SHIFT:
+            case "ShiftLeft":
+            case "ShiftRight":
                 if (global.showTree) this.treeScrollSpeedMultiplier = 1;
                 else this.socket.cmd.set(6, false);
                 break;
-            case global.KEY_UP_ARROW:
+            case "ArrowUp":
                 global.classTreeDrag.momentum.y = 0;
                 global.classTreeDrag.isDragging = false;
             case global.KEY_UP:
                 this.socket.cmd.set(0, false);
                 break;
-            case global.KEY_DOWN_ARROW:
+            case "ArrowDown":
                 global.classTreeDrag.momentum.y = 0;
                 global.classTreeDrag.isDragging = false;
             case global.KEY_DOWN:
                 this.socket.cmd.set(1, false);
                 break;
-            case global.KEY_LEFT_ARROW:
+            case "ArrowLeft":
                 global.classTreeDrag.momentum.x = 0;
                 global.classTreeDrag.isDragging = false;
             case global.KEY_LEFT:
                 this.socket.cmd.set(2, false);
                 break;
-            case global.KEY_RIGHT_ARROW:
+            case "ArrowRight":
                 global.classTreeDrag.momentum.x = 0;
                 global.classTreeDrag.isDragging = false;
             case global.KEY_RIGHT:
@@ -347,18 +373,48 @@ class Canvas {
             case global.KEY_MOUSE_2:
                 this.socket.cmd.set(6, false);
                 break;
-            case global.KEY_MAX_STAT:
+            case global.KEY_SKILL_MAX:
                 global.statMaxing = false;
                 break;
         }
         if (global.specialPressed) {
             let arrayCopy = global.specialKeysPressed.slice();
-            let i = global.specialKeysPressed.indexOf(event.keyCode);
+            let code = null;
+            let pressed = false;
+            let attributed = false;
+            for (let i = 0; i < global.KEY_ABILITIES.length; i++) {
+                let obj = global.KEY_ABILITIES[i];
+                if (global.specialKeysPressed.length && global.specialKeysPressed[0] === obj) {
+                    attributed = obj;
+                }
+            }
+            for (let obj in global) {
+                let wrongKey = false;
+                const thing = global[obj];
+                if (typeof thing === "string") {
+                    if (attributed) {
+                        if (!pressed && (obj === "KEY_SPECIAL_HELP" || obj === "KEY_SPECIAL_HELP_ALT" || obj.startsWith(attributed)) && thing === event.code) {
+                            code = obj;
+                            pressed = true;
+                        }
+                    } else if (!pressed && obj.startsWith("KEY_SPECIAL_") && thing === event.code) {
+                        for (let i = 0; i < global.KEY_ABILITIES.length; i++) {
+                            let obj2 = global.KEY_ABILITIES[i];
+                            if (obj.startsWith(obj2)) wrongKey = true;
+                        }
+                        if (!wrongKey) {
+                            code = obj;
+                            pressed = true;
+                        }
+                    }
+                }
+            }
+            let i = global.specialKeysPressed.indexOf(code);
             if (i >= 0) {
                 global.specialKeysPressed.splice(i, 1);
-                arrayCopy[i] = -event.keyCode;
+                arrayCopy[i] = `-${code}`;
             }
-            else arrayCopy.push(-event.keyCode);
+            else arrayCopy.push(`-${code}`);
             this.socket.talk("#", ...arrayCopy);
         }
     }
@@ -383,8 +439,34 @@ class Canvas {
                 }
                 let statIndex = global.clickables.stat.check(mpos);
                 let upgradeCheck = global.clickables.upgrade.check(mpos);
+                let optionsMenu_toggleBox = global.clickables.optionsMenu.toggleBoxes.check(mpos);
+                if (optionsMenu_toggleBox !== -1) {
+                    let box = global.optionsCheckboxes[optionsMenu_toggleBox];
+                    if (box.type === "slidingBar") {
+                        box.trigger?.(mpos, box);
+                        global.optionsMenu_Anim.sliderMoving = box;
+                    } else if (box.type === "option") {
+                        if (global.optionsMenu_Anim.currentOptionMenu && global.optionsMenu_Anim.currentOptionMenu !== box) {
+                            global.optionsMenu_Anim.currentOptionMenu.optionService.opened = false;
+                            global.optionsMenu_Anim.currentOptionMenu.optionService.canClick = false;
+                            global.optionsMenu_Anim.currentOptionMenu = false;
+                        }
+                        box.optionService.opened = !box.optionService.opened;
+                        if (box.optionService.opened) global.optionsMenu_Anim.currentOptionMenu = box, box.optionService.canClick = false;
+                    }
+                    break;
+                }
+                if (global.optionsCheckboxes) {
+                    for (let box of global.optionsCheckboxes) {
+                        if (box.type === "option" && box.optionService.opened && global.optionsCheckboxes[optionsMenu_toggleBox] !== box && global.clickables.optionsMenu.optionBoxes.check(mpos) === -1) {
+                            box.optionService.opened = false;
+                            global.optionsMenu_Anim.currentOptionMenu.optionService.canClick = false;
+                            global.optionsMenu_Anim.currentOptionMenu = false;
+                        }
+                    }
+                }
                 if (statIndex !== -1) {
-                    this.socket.talk('x', statIndex, 0);
+                    this.socket.talk("x", statIndex, 0);
                 } else if (
                     !global.dailyTankAd.renderUI &&
                     global.clickables.optionsMenu.toggleBoxes.check(mpos) == -1 && 
@@ -393,6 +475,7 @@ class Canvas {
                     global.clickables.skipUpgrades.check(mpos) == -1 && 
                     global.clickables.dailyTankUpgrade.check(mpos) == false &&
                     global.clickables.dailyTankAd.check(mpos) === false &&
+                    global.clickables.optionsMenu.mainMenuIdle.check(mpos) === false &&
                     upgradeCheck == -1 && 
                     !global.died
                 ) this.socket.cmd.set(primaryFire, true);
@@ -405,13 +488,17 @@ class Canvas {
                 break;
         }
     }
-    mouseUp(mouse) {
+   mouseUp(mouse) {
         let primaryFire = 4,
             secondaryFire = 6;
         if (this.inverseMouse) [primaryFire, secondaryFire] = [secondaryFire, primaryFire];
         global.clickables.clicked = false;
         switch (mouse.button) {
             case 0:
+                global.optionsMenu_Anim.sliderMoving = false;
+                if (global.optionsMenu_Anim.currentOptionMenu) {
+                    global.optionsMenu_Anim.currentOptionMenu.optionService.canClickSwitch = true;
+                };
                 let mpos = {
                     x: mouse.clientX * global.ratio,
                     y: mouse.clientY * global.ratio,
@@ -425,6 +512,7 @@ class Canvas {
                 let reconnectCheck = global.clickables.reconnect.check(mpos);
                 let optionsMenu_Switch = global.clickables.optionsMenu.switchButton.check(mpos);
                 let optionsMenu_toggleBox = global.clickables.optionsMenu.toggleBoxes.check(mpos);
+                let optionsMenu_clickOption = global.clickables.optionsMenu.optionBoxes.check(mpos);
                 let optionsMenu_tabClick = global.optionsMenu_Anim.tabClickables ? global.optionsMenu_Anim.tabClickables.check(mpos) : -1;
                 // Options menu clickables
                 if (optionsMenu_Switch === 0) {
@@ -437,20 +525,32 @@ class Canvas {
                     global.optionsMenu_Anim.switchMenu_button.set(0);
                     global.optionsMenu_Anim.mainMenu.set(-500);
                     global.optionsMenu_Anim.isOpened = false;
+                    if (global.optionsMenu_Anim.scrollTargets) global.optionsMenu_Anim.scrollTargets = [0, 0, 0];
+                    if (global.optionsMenu_Anim._wheelHandler) {
+                        window.removeEventListener("wheel", global.optionsMenu_Anim._wheelHandler);
+                        global.optionsMenu_Anim._wheelHandler = undefined;
+                    }
                     break;
                 }
                 if (optionsMenu_tabClick !== -1) {
                     global.optionsMenu_Anim.activeTab = optionsMenu_tabClick;
                     global.optionsMenu_Anim.tabOffset.set(optionsMenu_tabClick);
                     global.optionsMenu_Anim.mainMenuHeight.set(global.optionsMenu_Anim.tabs[optionsMenu_tabClick][1]);
+                    if (global.optionsMenu_Anim.scrollTargets) global.optionsMenu_Anim.scrollTargets[optionsMenu_tabClick] = 0;
                     break;
                 }
                 if (optionsMenu_toggleBox !== -1) {
                     let box = global.optionsCheckboxes[optionsMenu_toggleBox];
-                    let doc = document.getElementById(box.id);
-                    box.value = !box.value;
-                    if (doc) doc.checked = box.value;
-                    if (doc) util.submitToLocalStorage(box.id);
+                    if (box.type === "checkbox") {
+                        let doc = document.getElementById(box.id);
+                        box.value = !box.value;
+                        if (doc) doc.checked = box.value;
+                        if (doc) util.submitToLocalStorage(box.id);
+                    }
+                    break;
+                }
+                if (optionsMenu_clickOption !== -1 && global.optionsMenu_Anim.currentOptionMenu) {
+                    global.optionsMenu_Anim.currentOptionMenu.trigger?.(global.optionsMenu_Anim.currentOptionMenu, global.optionsMenu_Anim.currentOptionMenu.optionData[optionsMenu_clickOption]);
                     break;
                 }
                 // Stop dragging class tree
@@ -496,9 +596,9 @@ class Canvas {
                 if (exitGame !== -1) {
                     if (global.disconnected || (global.died && !global.cannotRespawn)) global.exit();
                 } else 
-                if (upgradeIndex !== -1 && upgradeIndex < gui.upgrades.length && !global.dailyTankAd.renderUI) this.socket.talk('U', upgradeIndex, parseInt(gui.upgrades[upgradeIndex][0]));
+                if (upgradeIndex !== -1 && upgradeIndex < gui.upgrades.length && !global.dailyTankAd.renderUI) this.socket.talk("U", upgradeIndex, parseInt(gui.upgrades[upgradeIndex][0]));
                 else if (dailyTankUpgrade == true && !global.dailyTankAd.renderUI) {
-                    this.socket.talk('U', JSON.stringify([{isDailyUpgrade: true, tank: gui.dailyTank.tank}]), "null");
+                    this.socket.talk("U", 0, -1);
                 } else if (dailyTankAd == true) {
                     this.socket.talk("DTA"); // Request to get an ad
                 } else if (dailyTankCloseAd == true && global.dailyTankAd.renderUI) {
@@ -537,6 +637,13 @@ class Canvas {
         if (this.spinLock) return;
         global.mouse.x = mouse.clientX * global.ratio;
         global.mouse.y = mouse.clientY * global.ratio;
+        if (global.optionsMenu_Anim.sliderMoving) {
+            global.optionsMenu_Anim.sliderMoving.trigger({}, global.optionsMenu_Anim.sliderMoving);
+        }
+        if (global.optionsMenu_Anim.currentOptionMenu && global.optionsMenu_Anim.currentOptionMenu.optionService.canClickSwitch) {
+            global.optionsMenu_Anim.currentOptionMenu.optionService.canClick = true;
+            global.optionsMenu_Anim.currentOptionMenu.optionService.canClickSwitch = false;
+        };
         if (global.gameStart) {
             this.mouseMoved = true;
             global.socket.cmd.reactNow();
@@ -624,7 +731,7 @@ class Canvas {
                 capture: () => {
                     ctx.canvas.width = this.cv.width; // Set Width
                     ctx.canvas.height = this.cv.height; // Set Height
-                    ctx.fillStyle = "#ffffff"
+                    ctx.fillStyle = "#FFFFFF"
                     ctx.fillRect(0, 0, this.cv.width, this.cv.height);
                     toMerge.forEach(layer => {
                         if (layer) ctx.drawImage(layer, 0, 0);
@@ -660,7 +767,8 @@ class Canvas {
         w.click();
         global.createMessage("Saving screenshot...", 3_000);
     }
-    // MOBILE SUPPORT
+
+    // Touchscreen Controls
     touchStart(e) {
         e.preventDefault();
         if (global.died && !global.cannotRespawn) {
@@ -727,7 +835,7 @@ class Canvas {
                             this.socket.talk("H");
                             break;
                         case 10:
-                            this.socket.talk("0");
+                            this.socket.talk("#", "KEY_SPECIAL_PRESET_2");
                             break;
                         case 11:
                             if (global.gameStart && !global.died && !global.disconnected) {
@@ -778,16 +886,20 @@ class Canvas {
             let id = touch.identifier;
 
             if (this.movementTouch === id) {
-                let radius = Math.min(global.screenWidth * 0.6, global.screenHeight * 0.12);
-                let cx = (mpos.x - (this.cv.width * 1) / 6)  / (radius / 64);
-                let cy = (mpos.y - (this.cv.height * 2) / 3)  / (radius / 64);
-                let touchX = cx / (radius / 64);
-                let touchY = cy / (radius / 64);
+                let ratio = global.canvas.height / global.screenHeight / global.ratio;
+                let radius = Math.min(
+                    global.screenWidth * 0.6,
+                    global.screenHeight * 0.12
+                );
+                let cx = (mpos.x - (this.cv.width * 1) / 6) / ratio / 2;
+                let cy = (mpos.y - (this.cv.height * 2) / 3) / ratio / 2;
+                let touchX = cx;
+                let touchY = cy;
                 let r = Math.sqrt(cx ** 2 + cy ** 2);
                 let angle = Math.atan2(cy, cx);
                 if (r > radius) {
-                    touchX = Math.cos(angle) * radius / 1.05;
-                    touchY = Math.sin(angle) * radius / 1.05;
+                    touchX = Math.cos(angle) * radius;
+                    touchY = Math.sin(angle) * radius;
                 }
                 this.movementTouchPos = { x: touchX, y: touchY };
                 let x = mpos.x - (this.cv.width * 1) / 6;
@@ -806,21 +918,26 @@ class Canvas {
                     this.socket.cmd.set(3, (this.movementRight = x > amount));
             } else if (this.controlTouch === id) {
                 global.mobileStatus.showCrosshair = true;
+                let ratio = global.canvas.height / global.screenHeight / global.ratio;
                 let radius = Math.min(
-                    global.screenWidth * 0.6,
-                    global.screenHeight * 0.12
+                    global.mobileStatus.useBigJoysticks ? global.screenWidth * 0.8 : global.screenWidth * 0.6,
+                    global.mobileStatus.useBigJoysticks ? global.screenHeight * 0.16 : global.screenHeight * 0.12
                 );
-                let cx = (mpos.x - (this.cv.width * 5) / 6)  / (radius / 64);
-                let cy = (mpos.y - (this.cv.height * 2) / 3)  / (radius / 64);
-                let touchX = cx / (radius / 64);
-                let touchY = cy / (radius / 64);
+                let cx = (mpos.x - (this.cv.width * 5) / 6) / ratio / 2;
+                let cy = (mpos.y - (this.cv.height * 2) / 3) / ratio / 2;
+                let touchX = cx;
+                let touchY = cy;
                 let r = Math.sqrt(cx ** 2 + cy ** 2);
                 let angle = Math.atan2(cy, cx);
                 if (r > radius) {
-                    touchX = Math.cos(angle) * radius / 1.05;
-                    touchY = Math.sin(angle) * radius / 1.05;
+                    touchX = Math.cos(angle) * radius;
+                    touchY = Math.sin(angle) * radius;
                 }
                 this.controlTouchPos = { x: touchX, y: touchY };
+                radius = Math.min(
+                    global.screenWidth * 0.12 / ratio,
+                    global.screenHeight * 0.24 / ratio
+                )
                 if (!this.spinLock) {
                     if (cx < -radius) cx = -radius;
                     else if (cx > radius) cx = radius;
@@ -853,7 +970,8 @@ class Canvas {
             }
         }
     }
-    // CONTROLLER/GAMEPAD SUPPORT
+
+    // Controller Controls
     runGamepad() {
         let sendHelp = () => {
             let helpLines = [
@@ -945,7 +1063,7 @@ class Canvas {
                 }
             
                 if (gamepadControls.Y === 1) {
-                    this.socket.talk('H');
+                    this.socket.talk("H");
                 }
 
                 if (gamepadControls.help === 1) {
@@ -954,7 +1072,7 @@ class Canvas {
                 // Shoot
                 if (this.gamepad.buttons[7].pressed) {
                     if (global.died && !global.cannotRespawn) {
-                        this.socket.talk('s', global.playerName, 0, 1 * config.game.autoLevelUp);
+                        this.socket.talk("s", global.playerName, 0, 1 * config.game.autoLevelUp);
                         global.died = false;
                     } else {
                         this.socket.cmd.set(4, true);

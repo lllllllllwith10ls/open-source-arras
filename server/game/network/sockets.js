@@ -1,14 +1,14 @@
 let crypto = require("crypto"),
-    net = require('net'),
+    net = require("net"),
     fs = require("fs");
-    PERMABAN_FILE = "./permabans.json";
+PERMABAN_FILE = "./permanentBans.json";
 let bans = global.bans || (global.bans = []);
 let permBans = global.permBans || (global.permBans = []);
 global.chatID = 0;
 
 class socketManager {
     constructor(parent) {
-        this.permissionsDict = {};
+        this.permissionsDict = Object.create(null);
         this.clients = parent.clients;
         this.gamemode = parent.gamemode;
         this.players = [];
@@ -17,7 +17,9 @@ class socketManager {
         this.bans = [];
         // Import permissions
         for (let entry of require("../permissions.js")) {
-            this.permissionsDict[entry.key] = entry;
+            if (entry.key != null) {
+                this.permissionsDict[entry.key] = entry;
+            }
         }
     };
 
@@ -29,15 +31,15 @@ class socketManager {
     broadcastRoom() {
         for (let i = 0; i < this.clients.length; i++) {
             this.clients[i].talk(
-                'r',
+                "r",
                 global.gameManager.room.width,
                 global.gameManager.room.height,
                 JSON.stringify(global.gameManager.room.setup.map(x => x.map(t => { 
                     return {
                         color: t.color,
-                        image: t.image ?? false,
+                        image: t.image ?? false
                     }
-                }))),
+                })))
             );
         }
     };
@@ -64,7 +66,7 @@ class socketManager {
             ip: socket.ip,
             time: time,
             name: (socket.player && socket.player.body && socket.player.body.name) || "Unnamed",
-            reason: reason,
+            reason: reason
         });
     }
 
@@ -90,13 +92,13 @@ class socketManager {
             ip: socket.ip,
             time: time,
             name: (socket.player && socket.player.body && socket.player.body.name) || "Unnamed",
-            reason: reason,
+            reason: reason
         });
 
         fs.writeFileSync(PERMABAN_FILE, JSON.stringify(permBans, null, 2));
     }
     chatLoop() {
-        // clean up expired messages
+    // clean up expired messages
         let now = Date.now();
         for (let i in chats) {
             chats[i].messages = chats[i].messages.filter((chat) => chat.expires > now);
@@ -105,7 +107,7 @@ class socketManager {
         // Send chat messages to everyone
         for (let view of global.gameManager.views) {
             let nearby = view.getNearby(),
-            array = [];
+                array = [];
 
             for (let entity of nearby.values()) {
                 let id = entity.id;
@@ -118,13 +120,15 @@ class socketManager {
                 }
             }
             if (view.socket.status.disablechat) {
-                view.socket.talk("CHAT_MESSAGE_ENTITY", JSON.stringify(array.map(o => {return {id: o.id, messages: []}})));
+                view.socket.talk("CHAT_MESSAGE_ENTITY", JSON.stringify(array.map(o => {
+                    return {id: o.id, messages: []} 
+                })));
             } else view.socket.talk("CHAT_MESSAGE_ENTITY", JSON.stringify(array));
         }
     }
 
     close(socket) {
-        // Figure out who the player was
+    // Figure out who the player was
         let player = socket.player,
             index = this.players.indexOf(player);
         // Remove it from any group if there was one...
@@ -155,7 +159,7 @@ class socketManager {
                     let disconnection = {
                         body: player.body,
                         ip: socket.ip,
-                        timeout: timeout,
+                        timeout: timeout
                     };
                     this.disconnections.push(disconnection);
                     player.command.autospin = false;
@@ -166,7 +170,7 @@ class socketManager {
             util.log("[INFO]: " + (player.body ? `User ${player.body.name == "" ? "A unnamed player" : player.body.name}` : "A user without an entity") + " disconnected!");
             util.remove(this.players, index);
         } else {
-            util.log("[INFO]: A player disconnected before entering the game.");
+            util.log("[INFO]: A player disconnected before entering the game!");
         }
         // Free the view
         util.remove(global.gameManager.views, global.gameManager.views.indexOf(socket.view));
@@ -183,7 +187,7 @@ class socketManager {
         util.log("[INFO]: The connection has closed. Views: " + global.gameManager.views.length + ". Clients: " + this.clients.length + ".");
     }
     incoming(message, socket) {
-        // Decode it
+    // Decode it
         let m = protocol.decode(message);
         // Remember who we are
         let player = socket.player;
@@ -197,13 +201,18 @@ class socketManager {
             return;
         }
         switch (m.shift()) {
-            case 'k': { // key verification
-                if (m.length > 1) { socket.kick('Ill-sized key request.'); return 1; }
-                if (socket.status.verified) { socket.kick('Duplicate player spawn attempt.'); return 1; }
-                socket.talk('w', true);
+            case "k": { // key verification
+                if (m.length > 1) {
+                    socket.kick("Ill-sized key request."); return 1; 
+                }
+                if (socket.status.verified) {
+                    socket.kick("Duplicate player spawn attempt."); return 1; 
+                }
+                socket.talk("w", true);
                 if (m.length === 1) {
                     let key = m[0].toString().trim();
-                    socket.permissions = this.permissionsDict[key];
+                    // Use hasOwnProperty to avoid prototype chain lookup
+                    socket.permissions = Object.prototype.hasOwnProperty.call(this.permissionsDict, key) ? this.permissionsDict[key] : undefined;
                     if (socket.permissions) {
                         util.log(`[INFO]: A socket was verified with the token: ${key}`);
                     } else {
@@ -213,30 +222,40 @@ class socketManager {
                 }
                 socket.status.verified = true;
                 if (this.clients.length == 1) {
-                    util.log('[INFO]: ' + this.clients.length + ' client connected');
+                    util.log("[INFO]: " + this.clients.length + " client connected");
                 } else {
-                    util.log('[INFO]: ' + this.clients.length + ' clients connected');
+                    util.log("[INFO]: " + this.clients.length + " clients connected");
                 }
             } break;
-            case 's': { // spawn request
-                if (!socket.status.deceased) { socket.kick('Trying to spawn while already alive.'); return 1; }
-                if (!global.gameManager.webProperties.maxPlayers < 1 && this.clients.length > global.gameManager.webProperties.maxPlayers) return (
-                    socket.talk("message", "This server is full, please rejoin later."),
-                    socket.kick("Server full.")
-                )
+            case "s": { // spawn request
+                if (!socket.status.deceased) {
+                    socket.kick("Trying to spawn while already alive."); return 1; 
+                }
+                if (global.gameManager.private && !socket.permissions) {
+                    return (
+                        socket.talk("message", "This server seems to be private."),
+                        socket.kick("Tried to join private server without valid token.")
+                    ) 
+                }
+                if (!global.gameManager.webProperties.maxPlayers < 1 && this.clients.length > global.gameManager.webProperties.maxPlayers) {
+                    return (
+                        socket.talk("message", "This server is full, please rejoin later."),
+                        socket.kick("Server full.")
+                    ) 
+                }
                 let b = bans.find((ban) => ban.ip === socket.ip);
                 if (b) {
                     socket.talk("temporaryban"); // Important, kick the user after calling temporaryban in order to see the ban message.
                     socket.kick("Temporarily banned player detected!");
                     return 1;
-                  }
+                }
                 let permB = permBans.find(
-                  (bannedIP) => bannedIP.ip === socket.ip
+                    (bannedIP) => bannedIP.ip === socket.ip
                 );
                 if (permB) {
                     socket.talk("permanentban");
                     socket.permaban("Permanently banned player found!");
-                  return 1;
+                    return 1;
                 }
                 // Get data
                 if (m.length < 4) {
@@ -249,47 +268,60 @@ class socketManager {
                 let transferbodyID = m[3];
                 let incognitoMode = m[4];
                 if (incognitoMode) socket.status.incognito = true;
+                else socket.status.incognito = false;
                 if (global.gameManager.arenaClosed) {
                     if (needsRoom) {
-                      socket.talk("message", "Arena closed. Try again in a few seconds.");
-                      socket.terminate("Bad spawn while arena closed.");
+                        socket.talk("message", "Arena closed. Wait a minute or try another server.");
+                        socket.terminate("Bad spawn while arena closed.");
                     } else socket.talk("m", 5_000, "Arena Closed.");
                     return;
                 };
                 // Verify it
-                if (typeof name != "string") { socket.kick("Bad spawn request. (name)"); return 1; }
-                if (encodeURI(name).split(/%..|./).length > 48) { socket.kick("Shorten your name!"); return 1; }
-                if (typeof m[1] !== "number") { socket.kick("Bad spawn request. (needsRoom)"); return 1; }
-                if (typeof autoLVLup !== "number") { socket.kick("Bad spawn request. (autoLVLup)"); return 1; }
-                if (typeof incognitoMode !== "number") { socket.kick("Bad spawn request. (incognito)"); return 1; }
-                if (transferbodyID && typeof transferbodyID != "string") { socket.kick("Bad body transfer. (transferbodyID)"); return 1; }
+                if (typeof name != "string") {
+                    socket.kick("Bad spawn request. (name)"); return 1; 
+                }
+                if (encodeURI(name).split(/%..|./).length > 48) {
+                    socket.kick("Shorten your name!"); return 1; 
+                }
+                if (typeof m[1] !== "number") {
+                    socket.kick("Bad spawn request. (needsRoom)"); return 1; 
+                }
+                if (typeof autoLVLup !== "number") {
+                    socket.kick("Bad spawn request. (autoLVLup)"); return 1; 
+                }
+                if (typeof incognitoMode !== "number") {
+                    socket.kick("Bad spawn request. (incognito)"); return 1; 
+                }
+                if (transferbodyID && typeof transferbodyID != "string") {
+                    socket.kick("Bad body transfer. (transferbodyID)"); return 1; 
+                }
                 if (transferbodyID) transferbodyID = transferbodyID.replace(name, "");
                 
                 // Get rid of the banned characters
-                name = name.replace(Config.banned_characters, '');
+                name = name.replace(Config.banned_characters, "");
 
                 // Give it the room state and move the camera.
                 if (needsRoom) {
                     if (Config.hidden) return socket.close(); // If the server is hidden then just kick the client.
                     this.newPlayer(socket);
                     socket.talk(
-                        'R',
+                        "R",
                         global.gameManager.room.width,
                         global.gameManager.room.height,
                         JSON.stringify(global.gameManager.room.setup.map(x => x.map(t => { 
                             return {
                                 color: t.color,
                                 visibleOnBlackout: t.visibleOnBlackout,
-                                image: t.image ?? false,
+                                image: t.image ?? false
                             }
                         }))),
                         JSON.stringify(util.serverStartTime),
                         global.gameManager.roomSpeed,
                         JSON.stringify({
                             active: Config.blackout,
-                            color: Config.blackout_fog,
+                            color: Config.blackout_fog
                         }),
-                        Config.arena_shape,
+                        Config.round_arena
                     );
                     return;
                 }
@@ -310,23 +342,31 @@ class socketManager {
                     }
                 }, 20)
             } break;
-            case 'S': { // clock syncing
-                if (m.length !== 1) { socket.kick('Ill-sized sync packet.'); return 1; }
+            case "S": { // clock syncing
+                if (m.length !== 1) {
+                    socket.kick("Ill-sized sync packet."); return 1; 
+                }
                 // Get data
                 let synctick = m[0];
                 // Verify it
-                if (typeof synctick !== 'number') { socket.kick('Weird sync packet.'); return 1; }
+                if (typeof synctick !== "number") {
+                    socket.kick("Weird sync packet."); return 1; 
+                }
                 // Bounce it back
-                socket.talk('S', synctick, util.time());
+                socket.talk("S", synctick, util.time());
             } break;
-            case 'p': { // ping
-                if (m.length !== 1) { socket.kick('Ill-sized ping.'); return 1; }
+            case "p": { // ping
+                if (m.length !== 1) {
+                    socket.kick("Ill-sized ping."); return 1; 
+                }
                 // Get data
                 let ping = m[0];
                 // Verify it
-                if (typeof ping !== 'number') { socket.kick('Weird ping.'); return 1; }
+                if (typeof ping !== "number") {
+                    socket.kick("Weird ping."); return 1; 
+                }
                 // Pong
-                socket.talk('p', ping.toFixed(1)); // Just pong it right back
+                socket.talk("p", ping.toFixed(1)); // Just pong it right back
                 socket.status.lastHeartbeat = util.time();
             } break;
             case "d": {
@@ -348,51 +388,51 @@ class socketManager {
                 socket.camera.lastDowndate = util.time();
             } break;
             case "C": {
-            // command packet
-            if (m.length !== 4) {
-                socket.kick("Ill-sized command packet.");
-                return 1;
-            }
-            // Get data
-            let target = {
-                    x: m[0],
-                    y: m[1],
-                },
-                reverseTank = m[2],
-                commands = m[3];
-            // Verify data
-            if (
-                typeof target.x !== "number" ||
-                typeof target.y !== "number" ||
-                typeof commands !== "number"
-            ) {
-                socket.kick("Weird downlink.");
-                return 1;
-            }
-            if (commands > 255) {
-                socket.kick("Malformed command packet.");
-                return 1;
-            }
-            if (player.body == null) return;
-            // Put the new target in
-            if (!socket.player.body.eastereggs.braindamage) player.target = target;
-            // Reverse the tank's facing if we want.
-            player.body.reverseTank = reverseTank;
-            // Process the commands
-            if (player.command != null) {
-                player.command.up = commands & 1;
-                player.command.down = (commands & 2) >> 1;
-                player.command.left = (commands & 4) >> 2;
-                player.command.right = (commands & 8) >> 3;
-                player.command.lmb = (commands & 16) >> 4;
-                player.command.mmb = (commands & 32) >> 5;
-                player.command.rmb = (commands & 64) >> 6;
-            }
+                // command packet
+                if (m.length !== 4) {
+                    socket.kick("Ill-sized command packet.");
+                    return 1;
+                }
+                // Get data
+                let target = {
+                        x: m[0],
+                        y: m[1]
+                    },
+                    reverseTank = m[2],
+                    commands = m[3];
+                // Verify data
+                if (
+                    typeof target.x !== "number" ||
+                    typeof target.y !== "number" ||
+                    typeof commands !== "number"
+                ) {
+                    socket.kick("Weird downlink.");
+                    return 1;
+                }
+                if (commands > 255) {
+                    socket.kick("Malformed command packet.");
+                    return 1;
+                }
+                if (player.body == null) return;
+                // Put the new target in
+                if (!socket.player.body.eastereggs.braindamage) player.target = target;
+                // Reverse the tank's facing if we want.
+                player.body.reverseTank = reverseTank;
+                // Process the commands
+                if (player.command != null) {
+                    player.command.up = commands & 1;
+                    player.command.down = (commands & 2) >> 1;
+                    player.command.left = (commands & 4) >> 2;
+                    player.command.right = (commands & 8) >> 3;
+                    player.command.lmb = (commands & 16) >> 4;
+                    player.command.mmb = (commands & 32) >> 5;
+                    player.command.rmb = (commands & 64) >> 6;
+                }
             } break;
             case "#": {
                 try {
                     runKeyCommand(socket, m);
-                } catch (e) { 
+                } catch(e) { 
                     console.error(e);
                 }
             } break;
@@ -415,8 +455,7 @@ class socketManager {
                     "autospin",
                     "autofire",
                     "override",
-                    "autoalt",
-                    "spinlock" //spinlock does something both in client and server side
+                    "autoalt"
                 ][tog];
     
                 // Kick if it sent us shit.
@@ -433,8 +472,6 @@ class socketManager {
             } break;
             case "U": {
                 // upgrade request
-                m[0] = util.isStringified(m[0]);
-                if (Array.isArray(m[0])) m[0] = m[0][0];
                 if (m.length !== 2) {
                     socket.kick("Ill-sized upgrade request.");
                     return 1;
@@ -442,12 +479,15 @@ class socketManager {
                 // Get data
                 let upgrade = m[0];
                 let branchId = m[1];
+                if (upgrade === 0 && branchId === -1) { // If client sends an daily tank request then we execute that
+                    if (!Config.daily_tank) return socket.kick("Bad daily tank upgrade request (there is no daily tanks set up)");
+                    player.body.upgrade(upgrade, branchId, false, true); // Ask to upgrade (daily tank request)
+                    return;
+                }
                 // Verify the request
-                if (typeof upgrade != "number" || upgrade < 0 || typeof branchId != "number" || branchId < 0) {
-                    if (!upgrade.isDailyUpgrade) { // Atleast allow the daily upgrade request, else get out.
-                        socket.kick("Bad upgrade request.");
-                        return 1;
-                    }
+                if (typeof upgrade != "number" || upgrade < 0 || typeof branchId != "number" || !isFinite(branchId) || branchId < 0) {
+                    socket.kick("Bad upgrade request.");
+                    return 1;
                 }
                 // Upgrade it
                 if (player.body != null) {
@@ -504,42 +544,17 @@ class socketManager {
                     player.body.refreshBodyAttributes();
                 }
             } break;
-            case "0": {
-                // testbed cheat
-                if (m.length !== 0) {
-                    socket.kick("Ill-sized testbed request.");
-                    return 1;
-                }
-                // cheatingbois
-                if (
-                    player.body != null &&
-                    socket.permissions &&
-                    socket.permissions.class
-                ) {
-                    player.body.define({RESET_UPGRADES: true, BATCH_UPGRADES: false});
-                    player.body.define(socket.permissions.class);
-                    let msg = Config.token_message.split("\n");
-                    if (!socket.status.specialTankWarned) {
-                        socket.status.specialTankWarned = true;
-                        for (let i = 0; i < msg.length; i++) {
-                            player.body.sendMessage(msg[i]);
-                        }
-                    }
-                }
-            } break;
             case "1": {
                 //suicide squad
                 if (player.body != null && !player.body.underControl && player.body.invuln) {
                     for (const instance of entities.values()) {
-                        if (
-                            instance.settings.clearOnMasterUpgrade &&
-                            instance.master.id === player.body.id
-                        ) {
+                        if (instance.settings.clearOnMasterUpgrade && instance.master.id === player.body.id) {
                             instance.kill();
                         }
                     }
                     player.body.sendMessage("You have self-destructed.");
                     player.body.destroy();
+                    if (Config.tag) Config.tag_data.removeFromTeam(-player.body.team);
                 }
             } break;
             case "H": {
@@ -547,35 +562,27 @@ class socketManager {
                 let ent = [];
                 let body = player.body;
                 for (let e of entities.values()) {
-                    if (e.isDominator || e.isMothership) ent.push(e);
+                    if (e.isDominator || e.isMothership || e.isBoss) ent.push(e);
                 }
                 body.emit("control", { body });
                 if (body.underControl) {
                     let relinquishedControlMessage = 
-                    Config.domination ? "dominator" : 
-                    Config.mothership ? "mothership" :
-                    "special tank"
-                    if (Config.domination || Config.mothership) {
-                        player.body.sendMessage(`You have relinquished control of the ${relinquishedControlMessage}.`);
-                        body.giveUp(player, body.isDominator ? "" : undefined);
-                        return 1;
-                    }
+                        body.isDominator ? "dominator" : 
+                            body.isMothership ? "mothership" :
+                                body.isBoss ? "visitor" :
+                                    "special tank"
+                    player.body.sendMessage(`You have relinquished control of the ${relinquishedControlMessage}.`);
+                    body.giveUp(player, body.isDominator ? "" : undefined);
+                    return 1;
                 }
                 if (Config.mothership) {
-                    let motherships = ent
-                        .map((entry) => {
-                            if (
-                                entry.isMothership &&
-                                entry.team === player.body.team &&
-                                !entry.underControl
-                            )
-                                return entry;
-                        })
-                        .filter((instance) => instance);
+                    let motherships = ent.map((entry) => {
+                        if (entry.isMothership && entry.team === player.body.team && !entry.underControl)return entry;
+                    }).filter((instance) => instance);
                     if (!motherships.length) {
-                        player.body.sendMessage("There are no motherships available that are on your team or already controlled by an player.");
+                        player.body.sendMessage("There are no motherships available that are on your team or not already controlled by a player.");
                         return 1;
-                    }
+                    };
                     let mothership = motherships.shift();
                     mothership.controllers = [];
                     mothership.underControl = true;
@@ -589,14 +596,35 @@ class socketManager {
                     player.body.name = body.name;
                     player.body.sendMessage("You are now controlling the mothership.");
                     player.body.sendMessage("Press F to relinquish control of the mothership.");
+                    if (Config.mothership_time_limit != 0) {
+                        if (Config.mothership_time_limit <= 10_000) {
+                            if (player.body == null) return;
+                            player.body.sendMessage(`You only have ${Math.floor(Config.mothership_time_limit / 1000)} second` + (Math.floor(Config.mothership_time_limit / 1000) == 1 ? "" : "s") + " in control of the mothership!");
+                            setTimeout(function() {
+                                if (player.body == null) return;
+                                player.body.sendMessage("You have lost control of the mothership.");
+                                body.giveUp(player, body.isDominator ? "" : undefined);
+                            }, Config.mothership_time_limit)
+                        } else {
+                            setTimeout(function() {
+                                if (player.body == null) return;
+                                player.body.sendMessage("You only have 10 seconds left in control of the mothership!");
+                                setTimeout(function() {
+                                    if (player.body == null) return;
+                                    player.body.sendMessage("You have lost control of the mothership.");
+                                    body.giveUp(player, body.isDominator ? "" : undefined);
+                                }, 10_000)
+                            }, Config.mothership_time_limit - 10_000)
+                        }
+                    }
                 } else if (Config.domination) {
                     let dominators = ent.map((entry) => {
                         if (entry.isDominator && entry.team === player.body.team && !entry.underControl) return entry;
-                    }).filter(x=>x);
+                    }).filter(x => x);
                     if (!dominators.length) {
-                        player.body.sendMessage("There are no dominators available that are on your team or already controlled by an player.");
+                        player.body.sendMessage("There are no dominators available that are on your team or not already controlled by a player.");
                         return 1;
-                    }
+                    };
                     let dominator = dominators.shift();
                     dominator.controllers = [];
                     dominator.underControl = true;
@@ -611,20 +639,41 @@ class socketManager {
                     player.body.name = body.name;
                     player.body.sendMessage("You are now controlling the dominator.");
                     player.body.sendMessage("Press F to relinquish control of the dominator.");
-                } else {
+                } else if (Config.boss_control) {
+                    let bosses = ent.map((entry) => {
+                        if (entry.isBoss && !entry.underControl) return entry;
+                    }).filter((instance) => instance);
+                    if (!bosses.length) {
+                        player.body.sendMessage("There are no visitors available that are not already controlled by a player.");
+                        return 1;
+                    };
+                    let boss = bosses.shift();
+                    boss.controllers = [];
+                    boss.underControl = true;
+                    player.body = boss;
+                    player.body.become(player);
+                    body.kill();
+                    if (!player.body.dontIncreaseFov) player.body.FOV += 0.5;
+                    player.body.dontIncreaseFov = true;
+                    player.body.skill.points = 0;
+                    player.body.refreshBodyAttributes();
+                    player.body.name = body.name;
+                    player.body.sendMessage("You are now controlling the visitor.");
+                    player.body.sendMessage("Press F to relinquish control of the visitor.");
+                }/* else {
                     player.body.sendMessage("There are no special tanks in this mode that you can control.");
-                }
+                }*/
             } break;
             case "M": {
                 if (player.body == null) return 1;
                 let abort, message = m[0], original = m[0];
     
-                if ("string" !==  typeof message) {
+                if ("string" !== typeof message) {
                     socket.kick("Non-string chat message.");
                     return 1;
                 }
     
-                util.log(player.body.name + ': ' + original);
+                util.log(player.body.name + ": " + original);
     
                 if (Config.sanitize_chat_input) {
                     // I thought it should be "§§" but it only works if you do "§§§§"?
@@ -632,13 +681,13 @@ class socketManager {
                     original = original.replace(/§/g, "§§§§");
                 }
     
-                Events.emit('chatMessage', { gameManager: global.gameManager, message: original, socket, preventDefault: () => abort = true, setMessage: str => message = str });
+                Events.emit("chatMessage", { gameManager: global.gameManager, message: original, socket, preventDefault: () => abort = true, setMessage: str => message = str });
     
                 // we are not anti-choice here.
                 if (abort) break;
     
                 if (message !== original) {
-                    util.log('changed to: ' + message);
+                    util.log("changed to: " + message);
                 }
     
                 let id = player.body.id;
@@ -683,7 +732,7 @@ class socketManager {
                         setTimeout(() => {
                             setTimeout(() => {
                                 socket.status.daily_tank_watched_ad_client = true;
-                            }, `${chosenAd.WAIT_TIME}000`)
+                            }, `${chosenAd.image_wait_time ?? "3"}000`)
                         }, socket.camera.ping) // make the counter accurate sycned as possible with the client.
                     }
                 }
@@ -805,7 +854,7 @@ class socketManager {
                     flagged = false;
                     return value;
                 }
-            },
+            }
         };
     }
 
@@ -837,8 +886,9 @@ class socketManager {
                  * excessive updates long after the first and only
                  * needed one as it slowly hits each updated value
                  */
-                for (let j = 0; j < vars.length; j++)
-                    if (vars[j].publish() != null) needsupdate = true;
+                for (let j = 0; j < vars.length; j++) {
+                    if (vars[j].publish() != null) needsupdate = true; 
+                }
                 if (needsupdate) {
                     // Update everything
                     for (let j = 0; j < statnames.length; j++) {
@@ -863,23 +913,23 @@ class socketManager {
                     out = [];
                     return o;
                 }
-            },
+            }
         };
     }
 
     getstuff(s) {
-        let val = '';
+        let val = "";
         //these have to be in reverse order
-        val += s.amount("shi").toString(16).padStart(2, '0');
-        val += s.amount("rgn").toString(16).padStart(2, '0');
-        val += s.amount("mob").toString(16).padStart(2, '0');
-        val += s.amount("rld").toString(16).padStart(2, '0');
-        val += s.amount("dam").toString(16).padStart(2, '0');
-        val += s.amount("pen").toString(16).padStart(2, '0');
-        val += s.amount("str").toString(16).padStart(2, '0');
-        val += s.amount("spd").toString(16).padStart(2, '0');
-        val += s.amount("hlt").toString(16).padStart(2, '0');
-        val += s.amount("atk").toString(16).padStart(2, '0');
+        val += s.amount("shi").toString(16).padStart(2, "0");
+        val += s.amount("rgn").toString(16).padStart(2, "0");
+        val += s.amount("mob").toString(16).padStart(2, "0");
+        val += s.amount("rld").toString(16).padStart(2, "0");
+        val += s.amount("dam").toString(16).padStart(2, "0");
+        val += s.amount("pen").toString(16).padStart(2, "0");
+        val += s.amount("str").toString(16).padStart(2, "0");
+        val += s.amount("spd").toString(16).padStart(2, "0");
+        val += s.amount("hlt").toString(16).padStart(2, "0");
+        val += s.amount("atk").toString(16).padStart(2, "0");
         return val;
     }
 
@@ -896,22 +946,24 @@ class socketManager {
         gui.score.update(JSON.stringify([b.skill.score, b.killCount.solo, b.killCount.assists, b.killCount.bosses]));
         gui.points.update(b.skill.points);
         // Update the upgrades
-        let upgrades = [];
-        let skippedUpgrades = [0];
-        for (let i = 0; i < b.upgrades.length; i++) {
-            let upgrade = b.upgrades[i];
-            if (b.skill.level >= b.upgrades[i].level) {
-                upgrades.push(upgrade.branch.toString() + "_" + upgrade.branchLabel + "_" + upgrade.index);
-            } else {
-                if (upgrade.branch >= skippedUpgrades.length) {
-                    skippedUpgrades[upgrade.branch] = 1;
+        if (!b.upgradePending) {
+            let upgrades = [];
+            let skippedUpgrades = [0];
+            for (let i = 0; i < b.upgrades.length; i++) {
+                let upgrade = b.upgrades[i];
+                if (b.skill.level >= b.upgrades[i].level) {
+                    upgrades.push(upgrade.branch.toString() + "_" + upgrade.branchLabel + "_" + upgrade.index);
                 } else {
-                    skippedUpgrades[skippedUpgrades.length - 1]++;
+                    if (upgrade.branch >= skippedUpgrades.length) {
+                        skippedUpgrades[upgrade.branch] = 1;
+                    } else {
+                        skippedUpgrades[skippedUpgrades.length - 1]++;
+                    }
                 }
             }
-        }
-        b.skippedUpgrades = skippedUpgrades;
-        gui.upgrades.update(upgrades);
+            b.skippedUpgrades = skippedUpgrades;
+            gui.upgrades.update(upgrades);
+        } else gui.upgrades.update([]);
         // Update daily tank
         if (Config.daily_tank) {
             if (b.skill.level >= Config.tier_multiplier * Config.daily_tank.tier && b.defs.includes(Config.spawn_class)) {
@@ -946,7 +998,7 @@ class socketManager {
             root: gui.root.publish(),
             class: gui.class.publish(),
             visibleName: gui.visibleName.publish(),
-            dailyTank: gui.dailyTank.publish(),
+            dailyTank: gui.dailyTank.publish()
         };
         // Encode which we'll be updating and capture those values only
         let oo = [0];
@@ -1009,7 +1061,7 @@ class socketManager {
     }
 
     newgui = (player) => {
-        // This is the protected gui data
+    // This is the protected gui data
         let gui = {
             master: player,
             fps: this.floppy(),
@@ -1026,12 +1078,12 @@ class socketManager {
             root: this.floppy(),
             class: this.floppy(),
             visibleName: this.floppy(),
-            dailyTank: this.floppy(),
+            dailyTank: this.floppy()
         };
         // This is the gui itself
         return {
             update: () => this.update(gui),
-            publish: () => this.publish(gui),
+            publish: () => this.publish(gui)
         };
     };
 
@@ -1045,9 +1097,13 @@ class socketManager {
         // Bring to life
         socket.status.deceased = false;
         // Define the player.
-        if (this.players.indexOf(socket.player) != -1) { util.remove(this.players, this.players.indexOf(socket.player));  }
+        if (this.players.indexOf(socket.player) != -1) {
+            util.remove(this.players, this.players.indexOf(socket.player));  
+        }
         // Free the old view
-        if (global.gameManager.views.indexOf(socket.view) != -1) { util.remove(global.gameManager.views, global.gameManager.views.indexOf(socket.view)); socket.makeView(); }
+        if (global.gameManager.views.indexOf(socket.view) != -1) {
+            util.remove(global.gameManager.views, global.gameManager.views.indexOf(socket.view)); socket.makeView(); 
+        }
         
         let spawn = true;
 
@@ -1141,12 +1197,6 @@ class socketManager {
             body.protect();
             body.isPlayer = true;
             body.define(Config.spawn_class);
-            if (Class.menu_tanks) {
-                let string = Class.menu_tanks.UPGRADES_TIER_0[0];
-                if (string !== "basic") {
-                    Class.menu_addons.UPGRADES_TIER_0.push("basic")
-                }
-            }
             body.name = name;
             body.incognito = socket.status.incognito ?? false;
             if (socket.permissions && socket.permissions.nameColor) {
@@ -1163,56 +1213,58 @@ class socketManager {
         socket.status.daily_tank_watched_ad = false;
         socket.status.daily_tank_watched_ad_client = false;
         // Decide how to color and team the body
-        if (!filter.length) switch (Config.mode) {
-            case 'tdm': {
-                body.team = player.team;
-                body.color.base = global.getTeamColor(player.body.team);
-                socket.rememberedTeam = body.team;
-            } break;
-            case 'tag': {
-                body.team = player.team;
-                body.color.base = global.getTeamColor(player.body.team);
-                socket.rememberedTeam = body.team;
-                Config.tag_data.addPlayer(body);
-            } break;
-            case 'clan': {
-                body.team = player.team;
-                body.originalName = body.name;
-                body.clan = player.clan;
-                body.color.base = getTeamColor(TEAM_RED);
-                socket.rememberedTeam = body.team;
-                Config.clan_wars_ft.add(name, body);
-                if (!body.clan) {
+        if (!filter.length) {
+            switch (Config.mode) {
+                case "tdm": {
+                    body.team = player.team;
+                    body.color.base = global.getTeamColor(player.body.team);
+                    socket.rememberedTeam = body.team;
+                } break;
+                case "tag": {
+                    body.team = player.team;
+                    body.color.base = global.getTeamColor(player.body.team);
+                    socket.rememberedTeam = body.team;
+                    Config.tag_data.addPlayer(body);
+                } break;
+                case "clan": {
+                    body.team = player.team;
+                    body.originalName = body.name;
+                    body.clan = player.clan;
+                    body.color.base = getTeamColor(TEAM_RED);
+                    socket.rememberedTeam = body.team;
+                    Config.clan_wars_ft.add(name, body);
+                    if (!body.clan) {
+                        let loop = setInterval(() => {
+                            for (let e of Config.clan_wars_ft.getClans()) {
+                                if (body.team !== e.team || body.team !== -101 || body.team !== -1 || body.team !== -2 || body.team !== -3 || body.team !== -4) {
+                                    clearInterval(loop);
+                                } else body.team = getRandomTeam();
+                            }
+                        })
+                    }
+                } break;
+                default: {
+                    let team = filter.length ? player.team : getRandomTeam();
+                    body.team = team;
+                    body.color.base = Config.random_body_colors ? 
+                        ran.choose([0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17]) : getTeamColor(TEAM_RED);
                     let loop = setInterval(() => {
-                    for (let e of Config.clan_wars_ft.getClans()) {
+                        for (let e of entities.values()) {
                             if (body.team !== e.team || body.team !== -101 || body.team !== -1 || body.team !== -2 || body.team !== -3 || body.team !== -4) {
                                 clearInterval(loop);
-                            } else body.team = getRandomTeam();
+                            } else body.team = team;
                         }
                     })
                 }
-            } break;
-            default: {
-                let team = filter.length ? player.team : getRandomTeam();
-                body.team = team;
-                body.color.base = Config.random_body_colors ? 
-                    ran.choose([ 0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17 ]) : getTeamColor(TEAM_RED);
-                let loop = setInterval(() => {
-                    for (let e of entities.values()) {
-                        if (body.team !== e.team || body.team !== -101 || body.team !== -1 || body.team !== -2 || body.team !== -3 || body.team !== -4) {
-                            clearInterval(loop);
-                        } else body.team = team;
-                    }
-                })
-            }
+            } 
         }
         this.preparePlayer(socket, player, body);
         return player;
     };
 
     preparePlayer(socket, player, body, doNotTakeAction = {}) {
-        // Decide what to do about colors when sending updates and stuff
-        player.teamColor = new Color(!Config.random_body_colors && (Config.groups || (Config.mode == 'ffa' || Config.mode == 'clan' && !Config.tag)) ? 10 : global.getTeamColor(body.team)).compiled; // blue
+    // Decide what to do about colors when sending updates and stuff
+        player.teamColor = new Color(!Config.random_body_colors && (Config.groups || (Config.mode == "ffa" || Config.mode == "clan" && !Config.tag)) ? 10 : global.getTeamColor(body.team)).compiled; // blue
         // Set up the targeting structure
         player.target = { x: 0, y: 0 };
         // Set up the command structure
@@ -1242,7 +1294,7 @@ class socketManager {
                 player.body.killCount.bosses,
                 player.body.killCount.polygons,
                 player.body.killCount.killers.length,
-                ...player.body.killCount.killers,
+                ...player.body.killCount.killers
             ];
         }
         // Set up the player's gui
@@ -1284,7 +1336,7 @@ class socketManager {
                 /*  8 */ data.angle,
                 /*  9 */ data.direction,
                 /* 10 */ data.offset,
-                /* 11 */ data.mirrorMasterAngle,
+                /* 11 */ data.mirrorMasterAngle
             );
         } else if (data.type & 0x10) {
             output.push(
@@ -1334,8 +1386,9 @@ class socketManager {
         // Add the gun data to the array
         output.push(data.guns.length);
         for (let i = 0; i < data.guns.length; i++) {
-            for (let k in data.guns[i])
-                output.push(data.guns[i][k]);
+            for (let k in data.guns[i]) {
+                output.push(data.guns[i][k]); 
+            }
         }
         // For each turret, add their own output
         output.push(data.turrets.length);
@@ -1374,7 +1427,7 @@ class socketManager {
             if (player.body.id === e.master.id) {
                 data = data.slice(); // So we don't mess up references to the original
                 // Set the proper color if it's on our team and decide what to do about colors when sending updates and stuff
-                player.teamColor = new Color(!Config.random_body_colors && (Config.groups || (Config.mode == 'ffa' || Config.mode == 'clan' && !Config.tag)) ? 10 : global.getTeamColor(player.body.team)).compiled; // blue
+                player.teamColor = new Color(!Config.random_body_colors && (Config.groups || (Config.mode == "ffa" || Config.mode == "clan" && !Config.tag)) ? 10 : global.getTeamColor(player.body.team)).compiled; // blue
                 // And make it force to our mouse if it ought to
                 if (player.command.autospin) {
                     data[10] = 1;
@@ -1388,7 +1441,7 @@ class socketManager {
             }
             if (
                 player.body.team === e.source.team &&
-                (Config.groups || (Config.mode == 'ffa' || Config.mode == 'clan' && !Config.tag))
+                (Config.groups || (Config.mode == "ffa" || Config.mode == "clan" && !Config.tag))
             ) {
                 // groups
                 data = data.slice();
@@ -1475,9 +1528,15 @@ class socketManager {
         let o = {
             socket,
             getNearby: () => nearby,
-            add: e => { if (check(socket.camera, e)) nearby.set(e.id, e); },
-            remove: e => { nearby.delete(e.id) },
-            check: (e) => { return check(socket.camera, e); },
+            add: e => {
+                if (check(socket.camera, e)) nearby.set(e.id, e); 
+            },
+            remove: e => {
+                nearby.delete(e.id) 
+            },
+            check: (e) => {
+                return check(socket.camera, e); 
+            },
             gazeUpon: (updateCam = false) => {
                 logs.network.set();
                 // If nothing has changed since the last update, wait (approximately) until then to update
@@ -1509,7 +1568,7 @@ class socketManager {
                             // Start the timeout
                             socket.timeout.start();
                         }
-                        if (player.body.master.label == "Bacteria") { // Why not trigger bacteria's abilities :)
+                        if (player.body.master.label == "Bacteria") { // Why not trigger bacteria's abilities :) // (WHY IS THIS A LABEL CHECK)
                             let exit = () => die();
                             let newgui = (player) => this.newgui(player);
                             becomeBulletChildren(socket, player, exit, newgui);
@@ -1621,7 +1680,7 @@ class socketManager {
                         "u",
                         true,
                         camera.x,
-                        camera.y,
+                        camera.y
                     );
                 } else {
                     // Update the gui
@@ -1642,7 +1701,7 @@ class socketManager {
                     );
                 }
                 logs.network.mark();
-            },
+            }
         };
         global.gameManager.views.push(o);
         return o;
@@ -1675,11 +1734,12 @@ class socketManager {
                         nowIndex++;
                         oldIndex++;
                         let updated = false;
-                        for (let i = 0; i < this.dataLength; i++)
+                        for (let i = 0; i < this.dataLength; i++) {
                             if (oldElement.data[i] !== nowElement.data[i]) {
                                 updated = true;
                                 break;
-                            }
+                            } 
+                        }
                         if (updated) {
                             updates.push(nowElement.id, ...nowElement.data);
                             updatesLength++;
@@ -1725,20 +1785,20 @@ class socketManager {
                 if (is === 0) break;
                 let entry = list[top];
                 let color = entry.leaderboardColor ? entry.leaderboardColor + " 0 1 0 false" 
-                    : Config.groups || (Config.mode == 'ffa' && !Config.tag) ? '11 0 1 0 false'
-                    : entry.color.compiled;
+                    : Config.groups || (Config.mode == "ffa" && !Config.tag) ? "11 0 1 0 false"
+                        : entry.color.compiled;
                 topTen.push({
                     id: entry.id,
                     data: [
                         Math.round(entry.skill.score),
                         entry.index,
                         entry.name,
-                        entry.leaderboardColor ? color : Config.mode == 'ffa' && !Config.tag ? '12 0 1 0 false' : color,
+                        entry.leaderboardColor ? color : Config.mode == "ffa" && !Config.tag ? "12 0 1 0 false" : color,
                         color,
                         entry.nameColor || "#FFFFFF",
                         entry.label,
-                        entry.settings.renderOnLeaderboard ?? true,
-                    ],
+                        entry.settings.renderOnLeaderboard ?? true
+                    ]
                 });
                 list.splice(top, 1);
             }
@@ -1767,9 +1827,9 @@ class socketManager {
                         entry.name === "" ? entry.label : entry.name,
                         entry.color.compiled,
                         entry.color.compiled,
-                        "#ffffff",
+                        "#FFFFFF",
                         Class.hp.LABEL,
-                        false,
+                        false
                     ]
                 });
                 list.splice(top, 1);
@@ -1796,8 +1856,8 @@ class socketManager {
                             util.clamp(Math.floor((256 * x) / global.gameManager.room.width), -128, 127),
                             util.clamp(Math.floor((256 * y) / global.gameManager.room.height), -128, 127),
                             Config.blackout ? Config.blackout_minimap_color + " 0 1 0 false" : my.minimapColor ? my.minimapColor + " 0 1 0 false" : my.color.compiled,
-                            Math.round(my.SIZE),
-                        ],
+                            Math.round(my.SIZE)
+                        ]
                     });
                 }
             }
@@ -1805,32 +1865,34 @@ class socketManager {
         });
         let minimapTeams = new Delta(3, args => {
             let all = [];
-            for (const my of entities.values())
+            for (const my of entities.values()) {
                 if (my.type === "tank" && my.team === args[0] && my.master === my && my.allowedOnMinimap) {
                     all.push({
                         id: my.id,
                         data: [
                             util.clamp(Math.floor((256 * my.x) / global.gameManager.room.width), -128, 127),
                             util.clamp(Math.floor((256 * my.y) / global.gameManager.room.height), -128, 127),
-                            my.minimapColor ? my.minimapColor + " 0 1 0 false" : Config.groups || (Config.mode == 'ffa' || Config.mode == 'clan' && !Config.tag) ? '10 0 1 0 false' : my.color.compiled,
-                        ],
+                            my.minimapColor ? my.minimapColor + " 0 1 0 false" : Config.groups || (Config.mode == "ffa" || Config.mode == "clan" && !Config.tag) ? "10 0 1 0 false" : my.color.compiled
+                        ]
                     });
-                }
+                } 
+            }
             return all;
         });
         let minimapAllTeams = new Delta(3, args => {
             let all = [];
-            for (const my of entities.values())
+            for (const my of entities.values()) {
                 if (my.type === "tank" && my.master === my && !my.lifetime) {
                     all.push({
                         id: my.id,
                         data: [
                             util.clamp(Math.floor((256 * my.x) / global.gameManager.room.width), -128, 127),
                             util.clamp(Math.floor((256 * my.y) / global.gameManager.room.height), -128, 127),
-                            my.minimapColor ? my.minimapColor + " 0 1 0 false" : Config.groups || (Config.mode == 'ffa' || Config.mode == 'clan' && !Config.tag) ? '12 0 1 0 false' : my.color.compiled,
-                        ],
+                            my.minimapColor ? my.minimapColor + " 0 1 0 false" : Config.groups || (Config.mode == "ffa" || Config.mode == "clan" && !Config.tag) ? "12 0 1 0 false" : my.color.compiled
+                        ]
                     });
-                }
+                } 
+            }
             return all;
         });
         let globalLeaderboard = new Delta(7, args => {
@@ -1838,19 +1900,19 @@ class socketManager {
             if (Config.tag) {
                 let teams = Config.tag_data.getData();
                 for (let i = 0; i < teams.length; i++) {
-                  list.push({
-                    id: i,
-                    data: [
-                      teams[i],
-                      Class.tagMode.index.toString(),
-                      teamNames[i],
-                      getTeamColor(-i - 1, true),
-                      getTeamColor(-i - 1, true),
-                      "#ffffff",
-                      Class.tagMode.LABEL,
-                      false,
-                    ],
-                  });
+                    list.push({
+                        id: i,
+                        data: [
+                            teams[i],
+                            Class.tagMode.index.toString(),
+                            teamNames[i],
+                            getTeamColor(-i - 1, true),
+                            getTeamColor(-i - 1, true),
+                            "#FFFFFF",
+                            Class.tagMode.LABEL,
+                            false
+                        ]
+                    });
                 }
                 return list;
             }
@@ -1867,9 +1929,9 @@ class socketManager {
                                 teamNames[i],
                                 getTeamColor(-i - 1, true),
                                 getTeamColor(-i - 1, true),
-                                "#ffffff",
+                                "#FFFFFF",
                                 Class.hp.LABEL,
-                                false,
+                                false
                             ]
                         });
                     }
@@ -1941,15 +2003,15 @@ class socketManager {
                 if (!socket.status.hasSpawned || socket.status.selectedLeaderboard == "stop") continue;
                 let sl = socket.status.selectedLeaderboard;
                 let getLeaderboard =
-                sl == "global" ? globalLeaderboard :
-                sl == "default" ? defaultLeaderboard :
-                sl == "players" ? playerLeaderboard :
-                sl == "bosses" ? bossLeaderboard :
-                globalLeaderboard;
+                    sl == "global" ? globalLeaderboard :
+                        sl == "default" ? defaultLeaderboard :
+                            sl == "players" ? playerLeaderboard :
+                                sl == "bosses" ? bossLeaderboard :
+                                    globalLeaderboard;
 
                 leaderboardUpdate = getLeaderboard.update(
                     socket.id,
-                    (Config.groups || (Config.mode == 'ffa' && !Config.tag)) && socket.player.body ? socket.player.body.id : null
+                    (Config.groups || (Config.mode == "ffa" && !Config.tag)) && socket.player.body ? socket.player.body.id : null
                 );
                 let team = socket.status.seesAllTeams ? minimapAllTeamsUpdate : minimapTeamUpdates;
                 
@@ -1963,18 +2025,18 @@ class socketManager {
                 if (socket.status.needsNewBroadcast) {
                     socket.talk("RM");
                     socket.talk(
-                      "b",
-                      ...minimapUpdate.reset,
-                      ...(team ? team.reset : [0, 0]),
-                      ...(socket.anon ? [0, 0] : leaderboardUpdate.reset)
+                        "b",
+                        ...minimapUpdate.reset,
+                        ...(team ? team.reset : [0, 0]),
+                        ...(socket.anon ? [0, 0] : leaderboardUpdate.reset)
                     );
                     socket.status.needsNewBroadcast = false;
                 } else {
                     socket.talk(
-                      "b",
-                      ...minimapUpdate.update,
-                      ...(team ? team.update : [0, 0]),
-                      ...(socket.anon ? [0, 0] : leaderboardUpdate.update)
+                        "b",
+                        ...minimapUpdate.update,
+                        ...(team ? team.update : [0, 0]),
+                        ...(socket.anon ? [0, 0] : leaderboardUpdate.update)
                     );
                 }
                 if (socket.status.forceNewBroadcast) {
@@ -1987,7 +2049,7 @@ class socketManager {
             let time = performance.now();
             for (let socket of this.clients) {
                 if (socket.timeout.check(time)) socket.lastWords("K");
-                if (time - socket.statuslastHeartbeat > Config.max_heartbeat_interval) socket.kick("Lost heartbeat.");
+                if (time - socket.status.lastHeartbeat > Config.max_heartbeat_interval) socket.kick("Lost heartbeat.");
             }
         }, 250);
         const broadcast = {
@@ -1995,11 +2057,11 @@ class socketManager {
             remove: socket => {
                 let i = subscribers.indexOf(socket);
                 if (i !== -1) util.remove(subscribers, i);
-            },
+            }
         };
         return {
             subscribe: (socket) => broadcast.add(socket),
-            unsubscribe: (socket) => broadcast.remove(socket),
+            unsubscribe: (socket) => broadcast.remove(socket)
         }
     })();
 
@@ -2007,10 +2069,9 @@ class socketManager {
         if (!socket.player?.body || socket.status.transferred) return;
         socket.status.transferred = true;
         let id = Math.floor(Math.random() * 0xffffffff).toString(16).padStart(8, "0");
-        fetch(`${server}/api/sendPlayer`, {
+        fetch(`${server}/api/sendPlayer?api_key=${process.env.API_KEY}`, {
             method: "POST",
             body: JSON.stringify({
-                key: process.env.API_KEY,
                 id: id,
                 name: socket.player.body.name,
                 definition: socket.player.body.defs.map(d => Object.keys(Class).find(k => Class[k] === d) || d),
@@ -2019,9 +2080,9 @@ class socketManager {
                 level: socket.player.body.skill.level,
                 skillcap: socket.player.body.skill.caps,
                 skill: socket.player.body.skill.raw,
-                points: socket.player.body.skill.points,
-            }),
-        }).then(async (r) => {
+                points: socket.player.body.skill.points
+            })
+        }).then(async(r) => {
             if (r.status === 200) {
                 socket.talk("t", server.replace("http://", "").replace("https://", ""), id);
             }
@@ -2032,7 +2093,7 @@ class socketManager {
     };
 
     connect(socket, req) {
-        util.log(`[INFO]: A client wants to connect...`);
+        util.log("[INFO]: A client wants to connect...");
         socket.player = { camera: {} };
         socket.nearby = [];
         socket.spectateEntity = null;
@@ -2054,7 +2115,7 @@ class socketManager {
         socket.permaban = (reason) => this.permaban(socket, reason);
         socket.lastWords = (...message) => {
             if (socket.readyState === socket.OPEN) { 
-                socket.send(protocol.encode(message), { binary: true, });
+                socket.send(protocol.encode(message), { binary: true });
                 socket.terminate();
             } 
         };
@@ -2068,7 +2129,7 @@ class socketManager {
                 receivedMockups: [],
                 receivedUpgradePackIndexes: [],
                 receivedUpgradePackMockups: [],
-                requestMockups: [],
+                requestMockups: []
             }
         }
         socket.messageManager = socket.on("message", message => this.incoming(message, socket));
@@ -2084,16 +2145,16 @@ class socketManager {
             }
         };
         socket.awaiting = {};
-        socket.awaitResponse = function (options, callback) {
+        socket.awaitResponse = function(options, callback) {
             socket.awaiting[options.packet] = {
                 callback: callback,
                 timeout: setTimeout(() => {
                     console.log("Socket did not respond to the eval packet, kicking...");
                     socket.kick("Did not comply with the server's protocol.");
-                }, options.timeout),
+                }, options.timeout)
             };
         };
-        socket.resolveResponse = function (id, packet) {
+        socket.resolveResponse = function(id, packet) {
             if (socket.awaiting[id]) {
                 clearTimeout(socket.awaiting[id].timeout);
                 socket.awaiting[id].callback(packet);
@@ -2118,7 +2179,7 @@ class socketManager {
             hasOperator: false,
             readyToBroadcast: false,
             mockupData: socket.initMockupList(),
-            lastHeartbeat: util.time(),
+            lastHeartbeat: util.time()
         };  
         // Set up loops
         let nextUpdateCall = null; // has to be started manually
@@ -2135,7 +2196,7 @@ class socketManager {
                 clearTimeout(nextUpdateCall);
                 clearTimeout(trafficMonitoring);
                 this.deltaHandler.unsubscribe(socket);
-            },
+            }
         };
         // Set up the camera
         socket.camera = {
@@ -2146,17 +2207,19 @@ class socketManager {
             lastUpdate: performance.now(),
             lastDowndate: undefined,
             scoping: false,
-            fov: 2000,
+            fov: 2000
         };
         // Set up the viewer
-        socket.makeView = () => { socket.view = this.eyes(socket); };
+        socket.makeView = () => {
+            socket.view = this.eyes(socket); 
+        };
         socket.makeView();
 
         // Account for proxies
         // Very simplified reimplementation of what the forwarded-for npm package does
-        let store = req.headers['fastly-client-ip'] || req.headers["cf-connecting-ip"] || req.headers['x-forwarded-for'] || req.headers['z-forwarded-for'] ||
-                    req.headers['forwarded'] || req.headers['x-real-ip'] || req.connection.remoteAddress,
-            ips = store.split(',');
+        let store = req.headers["fastly-client-ip"] || req.headers["cf-connecting-ip"] || req.headers["x-forwarded-for"] || req.headers["z-forwarded-for"] ||
+                    req.headers["forwarded"] || req.headers["x-real-ip"] || req.connection.remoteAddress,
+            ips = store.split(",");
 
         if (!ips) {
             return socket.kick("Missing IP: " + store);
@@ -2166,7 +2229,7 @@ class socketManager {
             if (net.isIPv6(ips[i])) {
                 ips[i] = ips[i].trim();
             } else {
-                ips[i] = ips[i].split(':')[0].trim();
+                ips[i] = ips[i].split(":")[0].trim();
             }
             if (!net.isIP(ips[i])) {
                 return socket.kick("Invalid IP(s): " + store);
@@ -2184,8 +2247,8 @@ class socketManager {
                     return;
                 }
             }
-        } catch (e) {
-            console.error("Error checking permabans:", e);
+        } catch(e) {
+            console.error("Error checking permanent bans:", e);
         }
         // Log it
         util.log("[INFO]: New socket opened with ip " + socket.ip);
@@ -2200,7 +2263,7 @@ class socketManager {
         } else {
             global.gameManager.parentPort.postMessage([true, this.clients.length]);
         }
-        util.log(`[INFO]: Client has been welcomed!`);
+        util.log("[INFO]: Client has been welcomed!");
 
         if (Config.load_all_mockups) {
             for (let i = 0; i < mockupData.length; i++) {

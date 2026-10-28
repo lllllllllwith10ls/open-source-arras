@@ -7,6 +7,7 @@ module.exports = {
     map_tile_height: 440,
     do_not_override_room: false,
     room_setup: ["room_assault_eye"],
+    maze: true,
     maze_type: 18,
     BOT_MOVE: [{
         TEAM: TEAM_GREEN,
@@ -22,7 +23,7 @@ module.exports = {
         RANGE: 20,
         MOVEMENT: [
             [-17.81, -68.63],
-            [-18.11, -11.70],
+            [-18.11, -11.70]
         ]
     }],
     team_weights: {

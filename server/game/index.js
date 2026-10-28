@@ -19,8 +19,8 @@ class gameHandler {
         if (instance.noclip || other.noclip) return 0;
 
         // Emit collision events
-        instance.emit('collide', { body: instance, instance, other });
-        other.emit('collide', { body: other, instance: other, other: instance });
+        instance.emit("collide", { body: instance, instance, other });
+        other.emit("collide", { body: other, instance: other, other: instance });
         // Custom tick handlers for bullet entities
         if (instance.tickHandler) instance.tickHandler(instance, instance, other);
         if (other.tickHandler) other.tickHandler(other, other, instance);
@@ -62,8 +62,7 @@ class gameHandler {
                     global.gameManager.socketManager.sendToServer(otherBody.socket, portal.settings.destination);
                 } else if (["bullet", "drone", "trap", "satellite"].includes(otherBody.type)) {
                     if (otherBody.master !== portal) otherBody.kill();
-                }
-                else if (!["wall", "aura"].includes(otherBody.type)) advancedcollide(portal, otherBody, false, false);
+                } else if (!["wall", "aura"].includes(otherBody.type)) advancedcollide(portal, otherBody, false, false);
                 break;
             case instance.type === "wall" || other.type === "wall":
                 if (instance.type === "wall" && other.type === "wall") return;
@@ -71,7 +70,7 @@ class gameHandler {
                 if (instance.type === "satellite" || other.type === "satellite") return;
                 let wall = instance.type === "wall" ? instance : other;
                 let entity = instance.type === "wall" ? other : instance;
-                if (entity.isArenaCloser || entity.master.isArenaCloser) return;
+                if (entity.isArenaCloser || (entity.isArenaCloser !== false && entity.master.isArenaCloser)) return;
                 switch (wall.shape) {
                     case 4:
                         switch (wall.walltype) {
@@ -130,7 +129,7 @@ class gameHandler {
                 break;
             case instance.settings.hitsOwnType === other.settings.hitsOwnType:
                 switch (instance.settings.hitsOwnType) {
-                    case 'assembler': {
+                    case "assembler": {
                         if (instance.assemblerLevel == null) instance.assemblerLevel = 1;
                         if (other.assemblerLevel == null) other.assemblerLevel = 1;
                         const [target1, target2] = (instance.id > other.id) ? [instance, other] : [other, instance];
@@ -146,16 +145,16 @@ class gameHandler {
                         }
                         const better = (state) => (target1[state] > target2[state] ? target1[state] : target2[state]);
                         target1.assemblerLevel = Math.min(target2.assemblerLevel + target1.assemblerLevel, 10);
-                        target1.SIZE = better('SIZE') * 1.15;
-                        target1.SPEED = better('SPEED') * 0.9;
-                        target1.HEALTH = better('HEALTH') * 1.2;
+                        target1.SIZE = better("SIZE") * 1.15;
+                        target1.SPEED = better("SPEED") * 0.9;
+                        target1.HEALTH = better("HEALTH") * 1.2;
                         target1.health.amount = target1.health.max;
-                        target1.DAMAGE = better('DAMAGE') * 1.1;
+                        target1.DAMAGE = better("DAMAGE") * 1.1;
                         target2.kill();
                         target1.refreshBodyAttributes();
                         for (let i = 0; i < 10; ++i) {
                             const o = new Entity(target1, target1);
-                            o.define('assemblerEffect');
+                            o.define("assemblerEffect");
                             o.team = target1.team;
                             o.color = target1.color;
                             o.SIZE = target1.SIZE / 1.5;
@@ -192,8 +191,9 @@ class gameHandler {
                         };
                         break;
                     case "hardOnlyBosses":
-                        if (instance.type === other.type && instance.type === "miniboss")
-                            firmcollide(instance, other);
+                        if (instance.type === other.type && instance.type === "miniboss") {
+                            firmcollide(instance, other); 
+                        }
                         break;
                     case "repel":
                         simplecollide(instance, other);
@@ -217,13 +217,13 @@ class gameHandler {
                     instance.settings.no_collisions = true;
                     instance.alpha = 0;
                     instance.takeSelfie();
-                    Config.OURBREAK_FUNCTIONS.zombify(instance);
+                    Config.outbreak_functions.zombify(instance);
                 } else instance.destroy();
                 continue;
             }
 
             // Reset collision array once at the beginning
-            instance.collisionArray = []; 
+            instance.collisionArray = [];
 
             // Handle physics only if not bonded
             if (instance.bond == null) {
@@ -270,7 +270,7 @@ class gameHandler {
             instance.activation.update();
             logs.activation.mark();
 
-            instance.emit('tick', { body: instance });
+            instance.emit("tick", { body: instance });
         }
         logs.entities.mark();
         logs.master.mark();
@@ -376,7 +376,7 @@ class gameHandler {
     };
     
     maintainloop = () => {   
-        // Upgrade bots's skill
+    // Upgrade bots' skill
         for (let i = 0; i < this.bots.length; i++) {
             let o = this.bots[i];
             if (o.skill.level < Config.level_cap && o.skill.level >= Config.bot_start_level) {
@@ -397,30 +397,33 @@ class gameHandler {
 
                 for (let i = 0; i < amount; i++) {
                     let spot, attempts = 30, name = names[i];
-                    do { spot = getSpawnableArea(TEAM_ENEMIES, global.gameManager); } while (attempts-- && dirtyCheck(spot, 500));
+                    do {
+                        spot = getSpawnableArea(TEAM_ENEMIES, global.gameManager); 
+                    } while (attempts-- && dirtyCheck(spot, 500));
 
                     let boss = new Entity(spot);
                     boss.define(selection.bosses.sort(() => 0.5 - Math.random())[i % selection.bosses.length]);
                     boss.team = TEAM_ENEMIES;
+                    boss.isBoss = true;
                     if (name) {
                         boss.name = name;
                     }
 
                     this.naturallySpawnedBosses.push(boss);
-                    boss.on('dead', () => util.remove(this.naturallySpawnedBosses, this.naturallySpawnedBosses.indexOf(boss)));
+                    boss.on("dead", () => util.remove(this.naturallySpawnedBosses, this.naturallySpawnedBosses.indexOf(boss)));
                 }
 
-                global.gameManager.socketManager.broadcast(`${util.listify(names)} ${names.length == 1 ? 'has' : 'have'} arrived!`);
+                global.gameManager.socketManager.broadcast(`${util.listify(names)} ha${names.length == 1 ? "s" : "ve"} arrived!`);
             }, Config.boss_spawn_delay * 30);
         }
     };
 
     quickMaintainLoop = () => {
-        // Auto get score
+    // Auto get score
         for (let i = 0; i < this.bots.length; i++) {
             let o = this.bots[i];
             o.skill.maintain();
-            o.skillUp([ "atk", "hlt", "spd", "str", "pen", "dam", "rld", "mob", "rgn", "shi" ][ran.chooseChance(...Config.bot_skill_upgrade_chances)]);
+            o.skillUp(["atk", "hlt", "spd", "str", "pen", "dam", "rld", "mob", "rgn", "shi"][ran.chooseChance(...Config.bot_skill_upgrade_chances)]);
             o.refreshSkills();
             if (o.leftoverUpgrades && o.upgrade(ran.irandomRange(0, o.upgrades.length))) {
                 o.leftoverUpgrades--;
@@ -429,8 +432,8 @@ class gameHandler {
         // Add new bots if arena is open
         if (!global.gameManager.arenaClosed && !global.cannotRespawn && this.bots.length < Config.bot_cap) {
             let team = Config.mode === "tdm" || Config.mode === "tag" ? getWeakestTeam(global.gameManager) : undefined,
-            limit = 20, // give up after 20 attempts and just pick whatever is currently chosen
-            loc;
+                limit = 20, // give up after 20 attempts and just pick whatever is currently chosen
+                loc;
             do {
                 loc = getSpawnableArea(team, global.gameManager);
             } while (limit-- && dirtyCheck(loc, 50, global.gameManager))
@@ -449,7 +452,7 @@ class gameHandler {
         o.name = botName;
         o.invuln = true;
         o.leftoverUpgrades = ran.chooseChance(...Config.bot_class_upgrade_chances);
-        let color = Config.random_body_colors ? Math.floor(Math.random() * 20) : team ? getTeamColor(team) : "darkGrey";
+        let color = Config.random_body_colors ? Math.floor(Math.random() * 20) : team ? getTeamColor(team) : "red";
         o.color.base = color;
         o.leaderboardColor = color;
         o.minimapColor = color;
@@ -472,14 +475,14 @@ class gameHandler {
             o.define({
                 CONTROLLERS: CC.CONTROLLERS ? [...Class.bot.CONTROLLERS, ...CC.CONTROLLERS] : Class.bot.CONTROLLERS,
                 FACING_TYPE: CC.FACING_TYPE ? CC.FACING_TYPE : Class.bot.FACING_TYPE,
-                AI: Class.bot.AI,
+                AI: Class.bot.AI
             }, false, true, false)
             if (CC && CC.HEALING_TANK) {
                 o.controllers = [];
                 o.define({
                     CONTROLLERS: ["healTeamMasters", "minion", ["wanderAroundMap", { replicatePlayerMovement: true, lookAtGoal: true }]],
                     FACING_TYPE: CC.FACING_TYPE ? CC.FACING_TYPE : Class.bot.FACING_TYPE,
-                    AI: Class.bot.AI,
+                    AI: Class.bot.AI
                 }, false, true, false);
             }
             o.name = botName;
@@ -492,13 +495,13 @@ class gameHandler {
                     o.define({ 
                         CONTROLLERS: ["healTeamMasters", "minion", ["wanderAroundMap", { replicatePlayerMovement: true, lookAtGoal: true }]],
                         FACING_TYPE: CC.FACING_TYPE ? CC.FACING_TYPE : Class.bot.FACING_TYPE,
-                        AI: Class.bot.AI,
+                        AI: Class.bot.AI
                     }, false, true, false);
                 }
-                o.define({ FACING_TYPE: CC.FACING_TYPE ? CC.FACING_TYPE : Class.bot.FACING_TYPE, AI: Class.bot.AI, }, false, true, false) // Just reoverride the facing type.
+                o.define({ FACING_TYPE: CC.FACING_TYPE ? CC.FACING_TYPE : Class.bot.FACING_TYPE, AI: Class.bot.AI }, false, true, false) // Just reoverride the facing type.
             })
         }, 3000 + Math.floor(Math.random() * 7000));
-        o.on('dead', () => {
+        o.on("dead", () => {
             setTimeout(() => {
                 if (global.nextTagBotTeam) {
                     let loc = getSpawnableArea(global.nextTagBotTeam, global.gameManager);
@@ -520,7 +523,7 @@ class gameHandler {
                     if (Config.enable_food) this.foodloop();
                     global.gameManager.roomLoop();
                     global.gameManager.gamemodeManager.request("quickloop");
-                } catch (e) {
+                } catch(e) {
                     global.gameManager.gameSpeedCheckHandler.onError(e);
                     this.stop();
                 };

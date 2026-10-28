@@ -29,7 +29,7 @@ exports.pointInUnitCircle = () => {
 exports.gauss = (mean=0, stdev=1) => {
     const u = 1 - Math.random();
     const v = Math.random();
-    const z = Math.sqrt( -2.0 * Math.log( u ) ) * Math.cos( 2.0 * Math.PI * v );
+    const z = Math.sqrt(-2.0 * Math.log(u)) * Math.cos(2.0 * Math.PI * v);
     // Transform to the desired mean and standard deviation:
     return z * stdev + mean;
 }
@@ -48,7 +48,7 @@ exports.gaussRing = (radius, clustering) => {
     let d = exports.gauss(radius, radius * clustering)
     return {
         x: d * Math.cos(r),
-        y: d * Math.sin(r),
+        y: d * Math.sin(r)
     }
 }
 
@@ -81,8 +81,9 @@ exports.shuffle = (arr) => {
 
 exports.chooseChance = (...arg) => {
     let totalProb = 0
-    for (let value of arg)
-        totalProb += value
+    for (let value of arg) {
+        totalProb += value 
+    }
 
     let answer = exports.random(totalProb)
     for (let i = 0; i < arg.length; i++) {

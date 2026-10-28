@@ -16,7 +16,7 @@ class ClanWars {
                             clanName: clanCheck[1],
                             partyEntities: [],
                             team: this.teamID++,
-                            index: this.index++,
+                            index: this.index++
                         })
                         util.log("[INFO]: Created an new clan party " + this.clans[this.index].fullClanName);
                     }
@@ -54,14 +54,18 @@ class ClanWars {
                         team: clan.team,
                         clan: clan.fullClanName
                     }
-                } else return {
-                    clan: null,
-                    team: getRandomTeam()
+                } else {
+                    return {
+                        clan: null,
+                        team: getRandomTeam()
+                    } 
                 }
             }
         }
     }
-    checkName(name) {return name.match(/\[(.*?)\]/)};
+    checkName(name) {
+        return name.match(/\[(.*?)\]/) 
+    };
     redefine(theshit) {
         this.gameManager = theshit;
     }

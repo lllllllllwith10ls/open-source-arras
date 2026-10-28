@@ -28,24 +28,28 @@ class speedcheckloop {
             this.fails++;
             if (Config.startup_logs) {
                 util.warn(`Last server tick took too long to calculate! Info: [Loops: ${loops}, Total Entities: ${entities.size}, Clients: ${global.gameManager.clients.length} Backlogged: ${(sum * global.gameManager.roomSpeed * 3).toFixed(3)}%]`)
-                util.warn('Total activation time: ' + activationtime);
-                util.warn('Total collision time: ' + collidetime);
-                util.warn('Total cycle time: ' + movetime);
-                util.warn('Total player update time: ' + playertime.sum);
-                util.warn('Total lb+minimap processing time: ' + maptime);
-                util.warn('Total entity physics calculation time: ' + physicstime);
-                util.warn('Total entity life+thought cycle time: ' + lifetime);
-                util.warn('Total entity thought cycle time: ' + thoughtime);
-                util.warn('Total entity selfie-taking time: ' + selfietime);
-                util.warn('Total time: ' + (movetime + playertime.sum + maptime));
+                util.warn("Total activation time: " + activationtime);
+                util.warn("Total collision time: " + collidetime);
+                util.warn("Total cycle time: " + movetime);
+                util.warn("Total player update time: " + playertime.sum);
+                util.warn("Total lb+minimap processing time: " + maptime);
+                util.warn("Total entity physics calculation time: " + physicstime);
+                util.warn("Total entity life+thought cycle time: " + lifetime);
+                util.warn("Total entity thought cycle time: " + thoughtime);
+                util.warn("Total entity selfie-taking time: " + selfietime);
+                util.warn("Total time: " + (movetime + playertime.sum + maptime));
             }
             if (this.fails > 20 && (sum).toFixed(0) > 300 && !this.isRestarting) {
                 this.isRestarting = true;
                 util.error("FAILURE!");
                 global.gameManager.socketManager.broadcast("Server overloaded! Restarting...");
                 global.gameManager.gameHandler.stop();
-                setTimeout(() => {global.gameManager.close()}, 900);
-                setTimeout(() => {this.isRestarting = false}, 3000);
+                setTimeout(() => {
+                    global.gameManager.close() 
+                }, 900);
+                setTimeout(() => {
+                    this.isRestarting = false 
+                }, 3000);
             }
         } else {
             this.fails = 0;
@@ -56,8 +60,12 @@ class speedcheckloop {
         this.isRestarting = true;
         util.error("FAILURE!");
         global.gameManager.socketManager.broadcast("Server Error! Restarting...");
-        setTimeout(() => {global.gameManager.close()}, 900);
-        setTimeout(() => {this.isRestarting = false}, 3000);
+        setTimeout(() => {
+            global.gameManager.close() 
+        }, 900);
+        setTimeout(() => {
+            this.isRestarting = false 
+        }, 3000);
         console.error(error);
     }
 }

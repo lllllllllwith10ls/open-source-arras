@@ -1,9 +1,9 @@
 /* jslint node: true */
 
-'use strict';
+"use strict";
 
 exports.addArticle = string => {
-    let article = /^[aeiou]/i.test(string) ? 'an' : 'a'
+    let article = /^[aeiou]/i.test(string) ? "an" : "a"
     return `${article} ${string}`
 }
 
@@ -18,13 +18,13 @@ exports.clamp = (value, min, max) => Math.min(Math.max(value, min), max)
 exports.lerp = (value, target, scale) => value + scale * (target - value)
 
 exports.listify = list => {
-    if (list.length === 0) return ''
+    if (list.length === 0) return ""
     if (list.length === 1) return list[0]
     if (list.length === 2) return `${list[0]} and ${list[1]}`
 
-    let output = ''
+    let output = ""
     for (let [i, item] of list.entries()) {
-        if (typeof item !== 'string') throw Error(`Item #${i + 1} (${item} of list is not a string.`)
+        if (typeof item !== "string") throw Error(`Item #${i + 1} (${item} of list is not a string.`)
         output += i !== list.length - 1 ? `${item}, ` : `and ${item}`
     }
     return output
@@ -36,7 +36,9 @@ exports.interpolateAngle = (angle, desired, step) => angle + exports.angleDiffer
 
 exports.averageArray = arr => {
     if (!arr.length) return 0;
-    var sum = arr.reduce((a, b) => { return a + b; });
+    var sum = arr.reduce((a, b) => {
+        return a + b; 
+    });
     return sum / arr.length;
 };
 
@@ -115,15 +117,16 @@ exports.deepClone = (obj, hash = new WeakMap()) => {
     if (hash.has(obj)) return hash.get(obj); // Cyclic reference
     try { // Try to run constructor (without arguments, as we don't know them)
         result = new obj.constructor();
-    } catch (e) { // Constructor failed, create object without running the constructor
+    } catch(e) { // Constructor failed, create object without running the constructor
         result = Object.create(Object.getPrototypeOf(obj));
     }
     // Optional: support for some standard constructors (extend as desired)
-    if (obj instanceof Map)
+    if (obj instanceof Map) {
         Array.from(obj, ([key, val]) => result.set(exports.deepClone(key, hash),
-            exports.deepClone(val, hash)));
-    else if (obj instanceof Set)
-        Array.from(obj, (key) => result.add(exports.deepClone(key, hash)));
+            exports.deepClone(val, hash))); 
+    } else if (obj instanceof Set) {
+        Array.from(obj, (key) => result.add(exports.deepClone(key, hash))); 
+    }
     // Register in hash    
     hash.set(obj, result);
     // Clone and assign enumerable own properties recursively
@@ -140,13 +143,13 @@ exports.time = () => {
 // create a custom timestamp format for log statements
 
 exports.log = text => {
-    console.log('[' + (exports.time() / 1000).toFixed(3) + ']: ' + text);
+    console.log(`[${(exports.time() / 1000).toFixed(3)}]: ${text}`);
 };
 exports.saveToLog = (title, description, color) => {
-    console.log("[!]: " + title + " (#" + color.toString(16).padStart(6, "0") + ")\n :: " + description);
+    console.log(`[!]: ${title} (#${color.toString(16).padStart(6, "0")})\n :: ${description}`);
 }
 exports.warn = text => {
-    console.log('[' + (exports.time() / 1000).toFixed(3) + ']: ' + '[WARNING]: ' + text);
+    console.log(`[${(exports.time() / 1000).toFixed(3)}]: [WARNING]: ${text}`);
 };
 exports.error = text => {
     console.log(text);
@@ -154,7 +157,7 @@ exports.error = text => {
 exports.remove = (array, index) => {
     // there is more than one object in the container
     if (index === array.length - 1) {
-        // special case if the obj is the newest in the container
+    // special case if the obj is the newest in the container
         return array.pop();
     } else {
         let o = array[index];
@@ -178,13 +181,15 @@ exports.flattenDefinition = (output, definition) => {
     if (definition.PARENT) {
         if (!Array.isArray(definition.PARENT)) {
             exports.flattenDefinition(output, definition.PARENT);
-        } else for (let parent of definition.PARENT) {
-            exports.flattenDefinition(output, parent);
+        } else {
+            for (let parent of definition.PARENT) {
+                exports.flattenDefinition(output, parent);
+            } 
         }
     }
 
     for (let key in definition) {
-        // Skip parents
+    // Skip parents
         if (key === "PARENT") {
             continue;
         }
@@ -207,5 +212,7 @@ exports.flattenDefinition = (output, definition) => {
 exports.isStringified = (str) => { 
     try {  
         return JSON.parse(str);  
-    } catch(e) { return str } 
+    } catch(e) {
+        return str 
+    } 
 }

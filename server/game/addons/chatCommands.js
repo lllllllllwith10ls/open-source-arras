@@ -2,29 +2,29 @@ const prefix = "$";
 
 /** COMMANDS **/
 let commands = [
-  {
+    {
         command: ["help"],
         description: "Show this help menu.",
         level: 0,
         run: ({ socket, level }) => {
             let useOldMenu = false;
             let lines = [
-            "Help menu:",
-            ...commands.filter((c) => level >= c.level && !c.hidden).map((c) => {
+                "Help menu:",
+                ...commands.filter((c) => level >= c.level && !c.hidden).map((c) => {
                     let cmdData = [c.command];
                     let commandText = cmdData.map((e) => e.map((name) => name).join(` or ${prefix} `)).join(" ")
                     let description = c.description ?? false;
                     let text = `- ${prefix} ${commandText}`;
                     if (description) text += ` - ${description}`;
                     return text;
-                }),
+                })
             ];
             if (useOldMenu) {
                 for (let line of lines.reverse()) {
                     socket.talk("m", 15_000, line);
                 }
             } else socket.talk("Em", 15_000, JSON.stringify(lines));
-        },
+        }
     },
     {
         command: ["leaderboard", "b"],
@@ -43,7 +43,7 @@ let commands = [
                 "default",
                 "players",
                 "bosses",
-                "global",
+                "global"
             ];
             const choice = args[0];
 
@@ -83,7 +83,7 @@ let commands = [
                     `- ${prefix} arena size <width> <height> - Set the size of the arena`,
                     `- ${prefix} arena team <team> - Set the number of teams, from 0 (FFA) to 4 (4TDM)`,
                     `- ${prefix} arena spawnpoint [x] [y] - Set a location where all players spawn on default`,
-                    `- ${prefix} arena close - Close the arena`,
+                    `- ${prefix} arena close - Close the arena`
                 ];
                 if (!Config.sandbox) lines.splice(1, 1)
                 socket.talk("Em", 10_000, JSON.stringify(lines));
@@ -121,7 +121,7 @@ let commands = [
                         socket.talk("m", 4_000, "Spawnpoint set.");
                         global.spawnPoint = {
                             x: parseInt(args[1] * 30),
-                            y: parseInt(args[2] * 30),
+                            y: parseInt(args[2] * 30)
                         };
                         break;
                     case "close":
@@ -142,8 +142,7 @@ let commands = [
         run: ({ args, socket }) => {
             if (!args[0]) {
                 socket.talk("m", 5_000, "No message specified.");
-            }
-            else {
+            } else {
                 gameManager.socketManager.broadcast(args.join(" "));
             }
         }
@@ -156,13 +155,12 @@ let commands = [
         run: ({ args, socket }) => {
             if (!args[0]) {
                 socket.talk("m", 5_000, "No entity specified.");
-            }
-            else {
+            } else {
                 socket.player.body.define({RESET_UPGRADES: true, BATCH_UPGRADES: false});
                 socket.player.body.define(args[0]);
                 socket.talk("m", 5_000, `Changed to ${socket.player.body.label}`);
             }
-        },
+        }
     },
     {
         command: ["level"],
@@ -172,12 +170,11 @@ let commands = [
         run: ({ args, socket }) => {
             if (!args[0]) {
                 socket.talk("m", 5_000, "No level specified.");
-            }
-            else {
+            } else {
                 socket.player.body.define({ LEVEL: args[0] });
                 socket.talk("m", 5_000, `Changed to level ${socket.player.body.level}`);
             }
-        },
+        }
     },
     {
         command: ["team"],
@@ -187,38 +184,37 @@ let commands = [
         run: ({ args, socket }) => {
             if (!args[0]) {
                 socket.talk("m", 5_000, "No team specified.");
-            }
-            else {
+            } else {
                 socket.player.body.define({ COLOR: getTeamColor(args[0]), TEAM: args[0] });
                 socket.talk("m", 5_000, `Changed to team ${socket.player.body.team}`);
             }
-        },
+        }
     },
     {
-        command: ["developer", "dev"],
+        command: ["developer", "dev", "d"],
         description: "Developer commands, go troll some players or just take a look for yourself.",
         level: 3,
         run: ({ socket, args, gameManager }) => {
             let sendAvailableDevCommandsMessage = () => {
                 let lines = [
                     "Help menu:",
-                    "- $ (developer / dev) reloaddefs - reloads definitions.",
+                    "- $ (developer / dev) reloaddefs - reloads definitions."
                 ];
                 socket.talk("Em", 10_000, JSON.stringify(lines));
             }
             let command = args[0];
-            if (command === "reloaddefs" || command === "redefs") {
+            if (command === "reloaddefs" || command === "redefs" || command === "r") {
                 /* IMPORT FROM (defsReloadCommand.js) */
                 if (!global.reloadDefinitionsInfo) {
                     global.reloadDefinitionsInfo = {
-                        lastReloadTime: 1,
+                        lastReloadTime: 1
                     };
                 }
                 // Rate limiter for anti-lag
                 let time = performance.now();
                 let sinceLastReload = time - global.reloadDefinitionsInfo.lastReloadTime;
                 if (sinceLastReload < 5000) {
-                    socket.talk('m', Config.popup_message_duration, `Wait ${Math.floor((5000 - sinceLastReload) / 100) / 10} seconds and try again.`);
+                    socket.talk("m", Config.popup_message_duration, `Wait ${Math.floor((5000 - sinceLastReload) / 100) / 10} seconds and try again.`);
                     return;
                 }
                 // Set the timeout timer ---
@@ -235,11 +231,11 @@ let commands = [
                 classMap.clear();
 
                 // Log it.
-                util.warn(`[IMPORTANT] Definitions are going to be reloaded on server ${gameManager.gamemode} (${gameManager.webProperties.id})!`);
+                util.warn("Reloading all definitions");
 
                 // Purge all cache entries of every file in definitions
                 for (let file in require.cache) {
-                    if (!file.includes('definitions') || file.includes(__filename)) continue;
+                    if (!file.includes("definitions") || file.includes(__filename)) continue;
                     delete require.cache[file];
                 }
 
@@ -247,7 +243,7 @@ let commands = [
                 gameManager.reloadDefinitions();
 
                 // Put the removal function back
-                Array.prototype.remove = function (index) {
+                Array.prototype.remove = function(index) {
                     if (index === this.length - 1) return this.pop();
                     let r = this[index];
                     this[index] = this.pop();
@@ -257,7 +253,7 @@ let commands = [
                 // Redefine all tanks and bosses
                 for (let entity of entities.values()) {
                     // If it's a valid type, and it's not a turret
-                    if (!['tank', 'miniboss', 'food'].includes(entity.type)) continue;
+                    if (!["tank", "miniboss", "food"].includes(entity.type)) continue;
                     if (entity.bond) continue;
 
                     let entityDefs = JSON.parse(JSON.stringify(entity.defs));
@@ -282,7 +278,7 @@ let commands = [
                 }
 
                 // Tell the command sender
-                socket.talk('m', Config.popup_message_duration, "Successfully reloaded all definitions.");
+                socket.talk("m", Config.popup_message_duration, "Successfully reloaded all definitions.");
 
 
                 // Erase mockups so it can rebuild.
@@ -299,20 +295,22 @@ let commands = [
                         socket.status.selectedLeaderboard2 = socket.status.selectedLeaderboard;
                         socket.status.selectedLeaderboard = "stop";
                         socket.talk("RE"); // Also reset the global.entities in the client so it can refresh.
-                        if (Config.load_all_mockups) for (let i = 0; i < mockupData.length; i++) {
-                            socket.talk("M", mockupData[i].index, JSON.stringify(mockupData[i]));
+                        if (Config.load_all_mockups) {
+                            for (let i = 0; i < mockupData.length; i++) {
+                                socket.talk("M", mockupData[i].index, JSON.stringify(mockupData[i]));
+                            } 
                         }
                         socket.status.selectedLeaderboard = socket.status.selectedLeaderboard2;
                         delete socket.status.selectedLeaderboard2;
                         socket.talk("CC"); // Clear cache
                     });
                     // Log it again.
-                    util.warn(`[IMPORTANT] Definitions are successfully reloaded on server ${gameManager.gamemode} (${gameManager.webProperties.id})!`);
+                    util.log("[INFO]: Successfully reloaded all definitions");
                     gameManager.gameHandler.run();
                 }, 1000)
             } else sendAvailableDevCommandsMessage();
-        },
-    },
+        }
+    }
 ]
 
 /** COMMANDS RUN FUNCTION **/
@@ -329,7 +327,7 @@ function runCommand(socket, message, gameManager) {
         if (permissionsLevel >= level) {
             try {
                 command.run({ socket, message, args, level: permissionsLevel, gameManager: gameManager });
-            } catch (e) {
+            } catch(e) {
                 console.error("Error while running ", commandName);
                 console.error(e);
                 socket.talk("m", 5_000, "An error occurred while running this command.");
@@ -339,7 +337,7 @@ function runCommand(socket, message, gameManager) {
 
     return true;
 }
-global.addChatCommand = function (command) {
+global.addChatCommand = function(command) {
     if (!command.command || !command.run) {
         throw new Error("Invalid command format. A command must have at least a 'command' and a 'run' property.");
     }

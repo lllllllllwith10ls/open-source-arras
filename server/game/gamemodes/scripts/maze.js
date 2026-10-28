@@ -3,7 +3,7 @@ class Maze {
         this.type = type;
     }
     generate() {
-        // Spawn maze
+    // Spawn maze
         for (let o of entities.values()) {
             if (o.type === "wall") o.destroy();
         }

@@ -1,5 +1,5 @@
-let fs = require('fs'),
-    path = require('path');
+let fs = require("fs"),
+    path = require("path");
 
 
 class definitionCombiner {
@@ -18,7 +18,7 @@ class definitionCombiner {
         if (Config.startup_logs && log) console.log("Loaded definitions in " + util.rounder(definitionGroupsLoadEnd - definitionGroupsLoadStart, 3) + " milliseconds. \n");
 
         // Now we can load the tank addons
-        if (Config.startup_logs && log) console.log(`Loading group addons...`);
+        if (Config.startup_logs && log) console.log("Loading group addons...");
         this.loadAddons(this.tankAddonLoc, log);
 
         // Calculate the length.
@@ -29,8 +29,8 @@ class definitionCombiner {
         if (Config.startup_logs && log) console.log("Loaded group addons in " + util.rounder(addonsLoadEnd - definitionGroupsLoadEnd, 3) + " milliseconds. \n");
 
         // Also include the other addons if needed!
-        if (Config.startup_logs && log) console.log(`Loading game addons...`);
-        if (includeGameAddons) this.loadAddons(path.join(__dirname, '../../game/addons'), log, "game addon");
+        if (Config.startup_logs && log) console.log("Loading game addons...");
+        if (includeGameAddons) this.loadAddons(path.join(__dirname, "../../game/addons"), log, "game addon");
 
         let gameaddonsLoadEnd = performance.now();
         if (Config.startup_logs && log) console.log("Loaded game addons in " + util.rounder(gameaddonsLoadEnd - addonsLoadEnd, 3) + " milliseconds. \n");
@@ -61,14 +61,14 @@ class definitionCombiner {
                 if (Etotal !== 0) total += Etotal;
             }
             // Now we don't want any html files in!
-            if (!filename.endsWith('.js')) continue;
+            if (!filename.endsWith(".js")) continue;
             total++;
         }
         return total;
     }
 
     loadGroups(directory, log) {
-        // Take the folder
+    // Take the folder
         let folder = fs.readdirSync(directory);
         for (let filename of folder) {
             // Create this file it's own filepath
@@ -79,14 +79,14 @@ class definitionCombiner {
                 this.loadGroups(filepath, log);
             }
             // Now we don't want any html files in!
-            if (!filename.endsWith('.js')) continue;
+            if (!filename.endsWith(".js")) continue;
             if (Config.startup_logs && log) console.log(`Loading group: ${filename}`);
             require(filepath);
         }
     }
 
     loadAddons(directory, logs = true, overrideLoadTextLog = false) {
-        // Take the folder
+    // Take the folder
         let folder = fs.readdirSync(directory);
         // And check every file in it
         for (let filename of folder) {
@@ -102,11 +102,11 @@ class definitionCombiner {
                 global.addonAuthorInfos.push(require(filepath));
             };
             // Now we don't want any html files in!
-            if (!filename.endsWith('.js')) continue;
+            if (!filename.endsWith(".js")) continue;
             if (Config.startup_logs && logs) console.log(`Loading ${overrideLoadTextLog ? overrideLoadTextLog : "group addon"}: ${filename}`);
             // Compile the addons
             let result = require(filepath);
-            if ('function' === typeof result) {
+            if ("function" === typeof result) {
                 result({ Class, Config, Events });
             }
             global.loadedAddons.push(filename.slice(0, -3));

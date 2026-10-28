@@ -1,135 +1,172 @@
 module.exports = {
-    // Open Source Arras
-    devBuild: false, // Dev build marker.
+    // Development
+    dev_build: false, // Whether this version is unstable and should be clearly marked as such.
 
     // Client
-    main_menu: 'index.html', // Where the main menu is located (in the /public folder).
-    host: 'localhost:3000', // Game server domain. If the host is 'localhost:NUMBER', the NUMBER must be the port setting.
+    main_menu: "index.html", // Where the main menu is located (in the /public folder).
+    host: "localhost:3000", // Game server domain. If the host is 'localhost:NUMBER', the NUMBER must be the port setting.
     port: 3000, // Which port to run the web server on.
 
     // Server
     visible_list_interval: 250, // How often to update the list of the entities that players can see. Has effects of when entities are activated.
-    startup_logs: true, // Enable startup logs and log speed loop warnings in the terminal
+    startup_logs: true, // Enable detailed startup logs and log speed loop warnings in the terminal
     load_all_mockups: false, // Set to true if you want every mockup to be loaded when the server starts. May noticeably slow down server startup.
+    editor: true, // Enable the editor at '[host]/ext/editor'.
 
-    servers: [ // Make sure to change the host, port and id between servers!
+    /* SERVER PROPERTIES INFORMATION - Make sure to change the host, port and id between servers!
+
+    share_client_server - Forces your server to share the same host and port as the client. (by default, 3000)
+    - Only one server at a time can have this enabled.
+    - This is REQUIRED if your server host doesn't support multi-ports and forces everything through the main server.
+
+    host        - Server host location.
+    port        - The port on the server.
+    id          - (<host>/#<id>)
+
+    region      - The region tab the server is sorted into on the main menu.
+    serverhost  - The host of the server in the server list tooltip.
+    location    - The location of the server in the server list tooltip.
+
+    gamemode    - The selected gamemode.
+    player_cap  - Not including bots. Set to 0 to disable.
+
+    featured    - Whether the server is featured or not.
+    unlisted    - Whether the server shows up in the server list (if its id isn't in the url).
+    private     - Whether the server requires a privileged token to join (except through server travel).
+
+    properties  - This overrides other settings in this file, assuming the selected gamemode doesn't also override it.
+  */
+
+    servers: [
         {
-            share_client_server: false, // Only one server at a time can have this enabled.
-            // The above is required if your VM (the machine that hosts the website stuff) doesn't support multi-ports and forces everything through the main server.
-            // This also overrides the below host and port settings to be identical to the main server's host/port (by default, 3000).
+            share_client_server: false,
+            host: "localhost:3001",
+            port: 3001,
+            id: "la",
 
-            host: 'localhost:3001', // Server host location.
-            port: 3001, // The port on the server.
-            id: 'la', // (<host>/#<id>)
+            region: "Local",
+            serverhost: "Local",
+            location: "Localhost",
+            gamemode: ["open_tdm"],
+            player_cap: 80,
 
-            region: "Local", // The region the server is on.
-            gamemode: ["open_tdm"], // The selected gamemode.
-            player_cap: 80, // The maximum number of players that can join the server. Not including bots.
+            featured: false,
+            unlisted: false,
+            private: false,
 
-            featured: false, // Whether the server is featured or not.
-            unlisted: true, // Whether the server shows up in the server list (if its id isn't in the url).
-            private: true, // Whether the server requires a privileged token to join (except through server travel).
-
-            properties: { // This overrides settings in the config.js file, assuming the selected gamemode doesn't also override it.
-                teams: 4,
-                bot_cap: 40
-            }
-        },
-        {
-            share_client_server: false, // Only one server at a time can have this enabled.
-            // The above is required if your VM (the machine that hosts the website stuff) doesn't support multi-ports and forces everything through the main server.
-            // This also overrides the below host and port settings to be identical to the main server's host/port (by default, 3000).
-
-            host: 'localhost:3002', // Server host location.
-            port: 3002, // The port on the server.
-            id: 'lb', // (<host>/#<id>)
-
-            region: "Local", // The region the server is on.
-            gamemode: ['retrograde', 'ffa'], // The selected gamemode.
-            player_cap: 80, // Not including bots. Set to 0 to disable.
-
-            featured: false, // Whether the server is featured or not.
-            unlisted: true, // Whether the server shows up in the server list (if its id isn't in the url).
-            private: true, // Whether the server requires a privileged token to join (except through server travel).
-
-            properties: { // This overrides settings in the config.js file, assuming the selected gamemode doesn't also override it.
-                teams: 4,
-                bot_cap: 16,
-                server_travel_properties: {
-                    loop_interval: 30_000, // how often the portal loop executes in seconds
-                    portals: 3, // amount of portals to spawn
-                },
+            properties: {
+                bot_cap: 20,
                 daily_tank: {
-                    tank: 'whirlwind',
+                    tank: "whirlwind",
                     tier: 3,
-                    ads: false,
+                    ads: true,
                     ad_sources: [
                         {
-                            file: 'testadvideo.mp4',
+                            file: "example_video_ad.mp4",
                             use_regular_ad_size: true
                         },
                         {
-                            file: 'testadimage.png',
+                            file: "example_image_ad.png",
                             use_regular_ad_size: true
                         }
                     ]
+                }
+            }
+        },
+        {
+            share_client_server: false,
+            host: "localhost:3002",
+            port: 3002,
+            id: "lb",
+
+            region: "Local",
+            serverhost: "Local",
+            location: "Localhost",
+            gamemode: ["maze"],
+            player_cap: 80,
+
+            featured: false,
+            unlisted: false,
+            private: false,
+
+            properties: {
+                allow_server_travel: true
+            }
+        },
+        {
+            share_client_server: false,
+            host: "localhost:3003",
+            port: 3003,
+            id: "lc",
+
+            region: "Local",
+            serverhost: "Local",
+            location: "Localhost",
+            gamemode: ["tdm"],
+            player_cap: 80,
+
+            featured: false,
+            unlisted: false,
+            private: false,
+
+            properties: {
+                teams: 2,
+                bot_cap: 40,
+                server_travel_properties: {
+                    loop_interval: 10_000, // how often the portal loop executes in seconds
+                    portals: 1 // amount of portals to spawn
                 },
                 server_travel: [
                     {
-                        ip: 'localhost:3003', // destination server host, don't add "https://" or any slashes to it
+                        ip: "localhost:3002", // destination server host, don't add "https://" or any slashes to it
                         portal_properties: {
                             spawn_chance: 3, // chance for a portal to spawn somewhere in the map each loop iteration (higher = lower chances, lower = higher chance)
-                            color: 'red', // portal color
+                            color: "red" // portal color
                         }
                     }
                 ]
             }
         },
         {
-            share_client_server: false, // Only one server at a time can have this enabled.
-            // The above is required if your VM (the machine that hosts the website stuff) doesn't support multi-ports and forces everything through the main server.
-            // This also overrides the below host and port settings to be identical to the main server's host/port (by default, 3000).
+            share_client_server: false,
+            host: "localhost:3004",
+            port: 3004,
+            id: "ld",
 
-            host: 'localhost:3003', // Server host location.
-            port: 3003, // The port on the server.
-            id: 'lx', // (<host>/#<id>)
+            region: "Local",
+            serverhost: "Local",
+            location: "Localhost",
+            gamemode: ["mothership"],
+            player_cap: 80,
 
-            region: "Local", // The region the server is on.
-            gamemode: ['nexus'], // The selected gamemode.
-            player_cap: 80, // Not including bots. Set to 0 to disable.
+            featured: false,
+            unlisted: false,
+            private: false,
 
-            featured: false, // Whether the server is featured or not.
-            unlisted: true, // Whether the server shows up in the server list (if its id isn't in the url).
-            private: true, // Whether the server requires a privileged token to join (except through server travel).
-
-            properties: { // This overrides settings in the config.js file, assuming the selected gamemode doesn't also override it.
-                teams: 4,
-                bot_cap: 0
-                //allow_server_travel: true
+            properties: {
+                mothership_time_limit: 30_000,
+                teams: 3,
+                bot_cap: 30
             }
         },
         {
-            share_client_server: false, // Only one server at a time can have this enabled.
-            // The above is required if your VM (the machine that hosts the website stuff) doesn't support multi-ports and forces everything through the main server.
-            // This also overrides the below host and port settings to be identical to the main server's host/port (by default, 3000).
+            share_client_server: false,
+            host: "localhost:3099",
+            port: 3099,
+            id: "lz",
 
-            host: 'localhost:3099', // Server host location.
-            port: 3099, // The port on the server.
-            id: 'lz', // (<host>/#<id>)
+            region: "Local",
+            serverhost: "Local",
+            location: "Localhost",
+            gamemode: ["sandbox"],
+            player_cap: 80,
 
-            region: "Local", // The region the server is on.
-            gamemode: ['sandbox'], // The selected gamemode.
-            player_cap: 16, // Not including bots. Set to 0 to disable.
+            featured: false,
+            unlisted: false,
+            private: false,
 
-            featured: false, // Whether the server is featured or not.
-            unlisted: false, // Whether the server shows up in the server list (if its id isn't in the url).
-            private: false, // Whether the server requires a privileged token to join (except through server travel).
-
-            properties: { // This overrides settings in the config.js file, assuming the selected gamemode doesn't also override it.
-                //teams: 4,
-                //bot_cap: 0
-            }
-        },
+            properties: {}
+        }
     ],
 
     // Web Server
@@ -141,12 +178,11 @@ module.exports = {
 
     // The message that appears once a player spawns.
     spawn_message: "You have spawned! Welcome to the game.\n"
-                 + "You will be invulnerable until you move or shoot.\n"
-                 + "Please report any bugs you encounter!",
+                 + "You will be invulnerable until you move or shoot.",
     token_message: "Friendly reminder: Please do not repeatedly kill others with an overpowered tank.",
 
-    chat_message_duration: 15_000, // How long a chat message lasts in milliseconds. Includes the fade-out period.
-    popup_message_duration: 10_000, // How long (in milliseconds) a popup message lasts before fading out.
+    chat_message_duration: 15_000, // How long a chat message lasts in milliseconds.
+    popup_message_duration: 10_000, // How long a popup message lasts in milliseconds.
     sanitize_chat_input: true, // If you don't want your players to color their messages. They get sanitized after addons interpret them, but before they're added to the chat message dictionary.
 
     // Seasonal
@@ -158,14 +194,19 @@ module.exports = {
     game_speed: 1, // General game speed.
     run_speed: 1.5, // General multiplier for acceleration and max speeds.
     max_heartbeat_interval: 300_000, // How long (in milliseconds) a socket can be disconnected before their tank self-destructs.
-    respawn_delay: 0, // How long you have to wait to respawn in seconds. Set to 0 to disable.
+    respawn_delay: 0, // How long (in seconds) you have to wait to respawn. Set to 0 to disable.
+
+    upgrade_delay: 3_000, // How long (in milliseconds) you have to stay still to upgrade outside of a base. Set to 0 to disable.
+    upgrade_delay_reminder: 20_000, // How often (in milliseconds) you will be reminded to stay still and not shoot to upgrade outside of a base if you haven't upgraded yet.
 
     bullet_spawn_offset: 1, // Where the bullet spawns, where 1 is fully outside the barrel and -1 is fully inside the barrel, and 0 is halfway between.
     damage_multiplier: 1, // General damage multiplier everytime damage is dealt.
     knockback_multiplier: 1.1, // General knockback multiplier everytime knockback is applied.
     glass_health_factor: 2, // TODO: Figure out how the math behind this works.
-    room_bound_force: 0.01,// How strong the force is that confines entities to the map and portals apply to entities.
+    room_bound_force: 0.01, // How strong the force is that confines entities to the map and portals apply to entities.
     soft_max_skill: 0.59, // TODO: Find out what the intention behind the implementation of this configuration is.
+
+    mothership_time_limit: 0, // How long (in milliseconds) a player can have in control of their team's mothership. Set to 0 to disable.
 
     // When an entity reaches a level, this function is called and returns how many skill points that entity gets for reaching that level.
     defineLevelSkillPoints: level => {
@@ -179,8 +220,8 @@ module.exports = {
     level_cap_cheat: 45, // Maximum level via the level-up key and auto-level-up.
 
     skill_cap: 9, // Default skill caps.
-    tier_cap: 17, // Amount of tank tiers.
-    tier_multiplier: 15, // Level difference between each tier.
+    skill_cap_soft: 0, // TODO: Figure out what this does.
+    tier_multiplier: 15, // Level difference between each upgrade tier.
 
     // Bots
     bot_cap: 0, // Maximum number of bots that can be on the server. Set to 0 to disable bots.
@@ -191,7 +232,7 @@ module.exports = {
     bot_name_prefix: "[AI] ", // This is prefixed before the bot's randomly chosen name.
 
     // The class that players and bots spawn as.
-    spawn_class: 'basic',
+    spawn_class: "basic",
 
     // How every entity regenerates their health.
     regenerate_tick: 100,
@@ -205,7 +246,7 @@ module.exports = {
 
     // Tiered Food
     food_types: Array(3).fill().map((_, i, a) => [ // Possible food types outside the nest
-        // Chance of spawning in exponents of 4
+    // Chance of spawning in exponents of 4
         4 ** (a.length - i),
         // 4-wide dimension of the 4 shape tiers - regular, beta, alpha, omega
         Array(3).fill().map((_, j, b) => [
@@ -215,18 +256,18 @@ module.exports = {
             Array(6).fill().map((_, k, c) => [
                 // Chance of spawning, set to 200mil for regular polygons and exponents of 10 otherwise
                 k ? 10 ** (c.length - k - 1) : 200_000_000,
-                
+
                 // 2-wide dimension of the 2 shape "ranks" - normal, crasher
                 // laby_${poly}_${tier}_${shiny}_${rank}
                 [
                     [24, `laby_${i}_${j}_${k}_0`],
-                    //[1, `laby_${i}_${j}_${k}_1`] // uncomment to enable crashers outside nest
+                    [1, `laby_${i}_${j}_${k}_1`] // uncomment to enable crashers outside nest
                 ]
             ])
         ])
     ]),
     food_types_nest: Array(2).fill().map((_, i, a) => [ // Possible food types in the nest
-        // Chance of spawning in exponents of 4
+    // Chance of spawning in exponents of 4
         4 ** (a.length - i),
         // 4-wide dimension of the 4 shape tiers - regular, beta, alpha, omega
         Array(3).fill().map((_, j, b) => [
@@ -241,7 +282,7 @@ module.exports = {
                 // laby_${poly}_${tier}_${shiny}_${rank}
                 [
                     [24, `laby_${i + 3}_${j}_${k}_0`],
-                    //[1, `laby_${i + 3}_${j}_${k}_1`] // uncomment to enable crashers in nest
+                    [1, `laby_${i + 3}_${j}_${k}_1`] // uncomment to enable crashers in nest
                 ]
             ])
         ])
@@ -251,62 +292,63 @@ module.exports = {
     classic_food: false, // Enables classic (Old Dreadnoughts) food types.
     classic_food_types: [ // Possible classic food types outside the nest
         [1, [
-            [65, 'egg'], [64, 'triangle'], [45, 'square'], [7, 'pentagon']//, [1, 'hexagon']
+            [65, "egg"], [64, "triangle"], [45, "square"], [7, "pentagon"]//, [1, "hexagon"]
         ]],
         [1/50000, [
-            [625, 'gem'], [125, 'shinyTriangle'], [25, 'shinySquare'], [5, 'shinyPentagon']//, [1, 'shinyHexagon']
+            [625, "gem"], [125, "shinyTriangle"], [25, "shinySquare"], [5, "shinyPentagon"]//, [1, "shinyHexagon"]
         ]],
         [1/1000000, [
-            [1296, 'jewel'], [216, 'legendaryTriangle'], [36, 'legendarySquare'], [6, 'legendaryPentagon']//, [1, 'legendaryHexagon']
+            [1296, "jewel"], [216, "legendaryTriangle"], [36, "legendarySquare"], [6, "legendaryPentagon"]//, [1, "legendaryHexagon"]
         ]]
     ],
     classic_food_types_nest: [ // Possible classic food types in the nest
         [1, [
-            [16, 'pentagon'], [4, 'betaPentagon'], [1, 'alphaPentagon']/*, [16, 'presentRY'], [16, 'presentRP'], [16, 'presentRW'], [16, 'presentGY'], [16, 'presentGP'], [16, 'presentGW'], [16, 'presentBY'], [16, 'presentBP'], [16, 'presentBW'],*/
+            [16, "pentagon"], [4, "betaPentagon"], [1, "alphaPentagon"]/*, [16, "presentRY"], [16, "presentRP"], [16, "presentRW"], [16, "presentGY"], [16, "presentGP"], [16, "presentGW"], [16, "presentBY"], [16, "presentBP"], [16, "presentBW"],*/
         ]]
     ],
     classic_enemy_types_nest: [ // Possible classic enemy food types in the nest
         [1, [
-            [1, 'crasher']
+            [1, "crasher"]
         ]],
         [1/20, [
-            [1, 'sentryGun'], [1, 'sentrySwarm'], [1, 'sentryTrap']
+            [1, "sentryGun"], [1, "sentrySwarm"], [1, "sentryTrap"]
         ]]
     ],
 
     // Bosses
     enable_bosses: true,
+    boss_control: false, // Allows players to control bosses like dominators and motherships.
     boss_spawn_cooldown: 260, // The delay (in seconds) between boss spawns.
     boss_spawn_delay: 6, // The delay (in seconds) between the boss spawn being announced and the boss(es) actually spawning.
     boss_types: [
-            {
-            bosses: ['eliteDestroyer', 'eliteGunner', 'eliteSprayer', 'eliteBattleship', 'eliteSpawner'],
-            amount: [5, 5, 4, 2, 1], chance: 2, nameType: 'a',
+        {
+            bosses: ["eliteDestroyer", "eliteGunner", "eliteSprayer", "eliteBattleship", "eliteSpawner"],
+            amount: [5, 5, 4, 2, 1], chance: 2, nameType: "a"
         },
         {
             bosses: ["eliteBomber","eliteFighter"],
-            amount: [2, 1, 1], chance: 1, nameType: "a",
+            amount: [2, 1, 1], chance: 1, nameType: "a"
         },
         {
             bosses: ['roguePalisade'],
             amount: [4, 1], chance: 1, nameType: 'castle',
-            message: 'A strange trembling...',
+            message: 'A strange trembling...'
         },
         {
-            bosses: ['summoner', 'eliteSkimmer', 'nestKeeper'],
-            amount: [2, 2, 1], chance: 1, nameType: 'a',
-            message: 'A strange trembling...',
-        },
-        /*{
-            bosses: ['paladin', 'freyja', 'zaphkiel', 'nyx', 'theia'],
-            amount: [1], chance: 0.01,
-            message: 'The world tremors as the celestials are reborn anew!',
-        },
-        {
-            bosses: ['julius', 'genghis', 'napoleon'],
-            amount: [1], chance: 0.1,
-            message: 'The darkness arrives as the realms are torn apart!',
-        }*/
+            bosses: ["summoner", "eliteSkimmer", "nestKeeper"],
+            amount: [2, 2, 1], chance: 1, nameType: "a",
+            message: "A strange trembling..."
+        }
+    /*{
+      bosses: ["paladin", "freyja", "zaphkiel", "nyx", "theia"],
+      amount: [1], chance: 0.01,
+      message: "The world tremors as the celestials are reborn anew!",
+    },
+    {
+      bosses: ["julius", "genghis", "napoleon"],
+      amount: [1], chance: 0.1,
+      message: "The darkness arrives as the realms are torn apart!",
+    }*/
     ],
 
     // How many members a team can have in comparison to an unweighed team.
@@ -315,33 +357,11 @@ module.exports = {
     team_weights: {},
 
     // Fun
-    brain_damage: false, // Disabled by default for epilepsy concerns. Violently shakes your camera and tank if you name yourself 'Brain Damage'.
+    brain_damage: false, // Violently shakes your camera and tank if you name yourself 'Brain Damage'. Disabled by default for epilepsy concerns.
     random_body_colors: false,
 
-    // These are the default values for gamemode related things.
-    // If you want to change them, copy the values you want to change to the server's properties.
-    // DO NOT change them here unless you know what you are doing!
-    gamemode_name_prefixes: [],
-    arena_shape: 'rect',
-    arms_race: false,
-    blackout: false,
-    clan_wars: false,
-    diep: false,
-    domination: false,
-    growth: false,
-    groups: false,
-    march_madness: false,
-    mode: 'ffa',
-    mothership: false,
-    retrograde: false,
-    siege: false,
-    space_physics: false,
-    spawn_confinement: {},
-    tag: false,
-    teams: 4,
-    train: false,
-    use_limited_waves: false,
-
-    // Room setup
-    room_setup: ['room_default'],
+    // Room setup (don't change these unless you know what you're doing)
+    room_setup: ["room_default"],
+    round_arena: false,
+    mode: "ffa"
 }

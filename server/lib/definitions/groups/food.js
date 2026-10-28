@@ -1,8 +1,9 @@
-const {makeCrasher, makeLaby, makePolychoron, makePolyhedron, makePresent, makeRarities, makeRelic} = require('../facilitators.js')
-const {basePolygonDamage, basePolygonHealth} = require('../constants.js')
+const { makeCrasher, makeLaby, makePolychoron, makePolyhedron, makePresent, makeRarities, makeRelic } = require("../facilitators.js");
+const { basePolygonDamage, basePolygonHealth } = require("../constants.js");
+const preset = require("../presets.js");
 
 // Set the below variable to true to enable the flat 3D shapes from Old Dreadnoughts.
-const classic_3D_shapes = false
+const classic_3D_shapes = false;
 
 // Eggs
 Class.egg = {
@@ -64,7 +65,6 @@ Class.jewel = {
     INTANGIBLE: false,
     GIVE_KILL_MESSAGE: true
 }
-makeRarities("egg")
 
 // Squares
 Class.square = {
@@ -84,7 +84,6 @@ Class.square = {
     DRAW_HEALTH: true,
     INTANGIBLE: false
 }
-makeRarities("square")
 
 // Triangles
 Class.triangle = {
@@ -104,7 +103,6 @@ Class.triangle = {
     },
     DRAW_HEALTH: true
 }
-makeRarities("triangle")
 
 // Pentagons
 Class.pentagon = {
@@ -162,9 +160,6 @@ Class.alphaPentagon = {
     DRAW_HEALTH: true,
     GIVE_KILL_MESSAGE: true
 }
-makeRarities("pentagon")
-makeRarities("betaPentagon")
-makeRarities("alphaPentagon")
 
 // Hexagons
 Class.hexagon = {
@@ -173,7 +168,7 @@ Class.hexagon = {
     VALUE: 500,
     SHAPE: 6,
     SIZE: 25,
-    COLOR: "hexagon",
+    COLOR: "aqua",
     BODY: {
         DAMAGE: 3 * basePolygonDamage,
         DENSITY: 8,
@@ -185,7 +180,6 @@ Class.hexagon = {
     },
     DRAW_HEALTH: true
 }
-makeRarities("hexagon")
 
 // Crashers
 Class.crasher = {
@@ -197,7 +191,7 @@ Class.crasher = {
     VARIES_IN_SIZE: true,
     CONTROLLERS: ["nearestDifferentMaster", "mapTargetToGoal"],
     AI: {
-        NO_LEAD: true,
+        NO_LEAD: true
     },
     BODY: {
         SPEED: 5,
@@ -207,13 +201,13 @@ Class.crasher = {
         PENETRATION: 2,
         PUSHABILITY: 0.5,
         DENSITY: 10,
-        RESIST: 2,
+        RESIST: 2
     },
     MOTION_TYPE: "motor",
     FACING_TYPE: "smoothWithMotion",
     HITS_OWN_TYPE: "hard",
     HAS_NO_MASTER: true,
-    DRAW_HEALTH: true,
+    DRAW_HEALTH: true
 }
 
 // Old Dreadnoughts Polygons
@@ -291,12 +285,23 @@ Class.nonagon = {
         ACCELERATION: 0.0025
     },
     DRAW_HEALTH: true,
-    GIVE_KILL_MESSAGE: true,
+    GIVE_KILL_MESSAGE: true
 }
-makeRarities("hexagon_old")
-makeRarities("septagon")
-makeRarities("octagon")
-makeRarities("nonagon")
+
+// Rarities
+makeRarities([
+    "egg",
+    "square",
+    "triangle",
+    "pentagon",
+    "betaPentagon",
+    "alphaPentagon",
+    "hexagon",
+    "hexagon_old",
+    "septagon",
+    "octagon",
+    "nonagon"
+])
 
 // 3D
 if (!classic_3D_shapes) {
@@ -333,7 +338,7 @@ if (!classic_3D_shapes) {
         VERTEXES_SCALE: 0.1
     })
     octahedron_shape = makePolyhedron({
-        FACES: (function () {
+        FACES: (function() {
             const x = 3 / (2 * Math.sqrt(2));
             const y = 3 / 2;
             return [
@@ -351,7 +356,7 @@ if (!classic_3D_shapes) {
         VERTEXES_SCALE: 0.1
     })
     dodecahedron_shape = makePolyhedron({
-        FACES: (function () {
+        FACES: (function() {
             let phi = (1 + Math.sqrt(5)) / 2,
                 x = 1,
                 y = 1 / phi,
@@ -452,7 +457,7 @@ if (!classic_3D_shapes) {
         VERTEXES_SCALE: 0.1
     })
     icosahedron_shape = makePolyhedron({
-        FACES: (function () {
+        FACES: (function() {
             let phi = (1 + Math.sqrt(5)) / 2, // golden ratio
                 x = 1 / 2,
                 y = 1 / (2 * phi);
@@ -567,36 +572,36 @@ if (!classic_3D_shapes) {
     })
     tesseract_shape = makePolychoron({
         VERTEXES: [
-            [ -1, 1, 1, 1 ],   [ 1, 1, 1, 1 ],
-            [ 1, -1, 1, 1 ],   [ -1, -1, 1, 1 ],
-            [ -1, 1, -1, 1 ],  [ 1, 1, -1, 1 ],
-            [ 1, -1, -1, 1 ],  [ -1, -1, -1, 1 ],
-            [ -1, 1, 1, -1 ],  [ 1, 1, 1, -1 ],
-            [ 1, -1, 1, -1 ],  [ -1, -1, 1, -1 ],
-            [ -1, 1, -1, -1 ], [ 1, 1, -1, -1 ],
-            [ 1, -1, -1, -1 ], [ -1, -1, -1, -1 ]
+            [-1, 1, 1, 1],   [1, 1, 1, 1],
+            [1, -1, 1, 1],   [-1, -1, 1, 1],
+            [-1, 1, -1, 1],  [1, 1, -1, 1],
+            [1, -1, -1, 1],  [-1, -1, -1, 1],
+            [-1, 1, 1, -1],  [1, 1, 1, -1],
+            [1, -1, 1, -1],  [-1, -1, 1, -1],
+            [-1, 1, -1, -1], [1, 1, -1, -1],
+            [1, -1, -1, -1], [-1, -1, -1, -1]
         ],
         FACES: [
             // broken
-            [0,1,2,3], [7,6,5,4], [0,1,5,4], [1,2,6,5], [2,3,7,6], [3,0,4,7],
-            [8,9,10,11], [15,14,13,12], [8,9,13,12], [9,10,14,13], [10,11,15,14], [11,8,12,15],
-            [0,1,9,8],
-            [4,5,13,12],
-            [1,2,10,9],
-            [3,0,8,11],
-            [2,3,11,10],
-            [7,6,14,15],[5,6,14,13], [4,7,15,12]
+            [0, 1, 2, 3], [7, 6, 5, 4], [0, 1, 5, 4], [1, 2, 6, 5], [2, 3, 7, 6], [3, 0, 4, 7],
+            [8, 9, 10, 11], [15, 14, 13, 12], [8, 9, 13, 12], [9, 10, 14, 13], [10, 11, 15, 14], [11, 8, 12, 15],
+            [0, 1, 9, 8],
+            [4, 5, 13, 12],
+            [1, 2, 10, 9],
+            [3, 0, 8, 11],
+            [2, 3, 11, 10],
+            [7, 6, 14, 15], [5, 6, 14, 13], [4, 7, 15, 12]
         ],
         VERTEXES_SCALE: 0.1,
         SCALE: 6
     })
 } else {
-    cube_shape = [[0.1,0],[0.6,-0.8660254037844386],[1.1,0],[0.6,0.8660254037844386],[0.1,0],[-0.05,0.08660254037844387],[0.45,0.9526279441628825],[-0.55,0.9526279441628825],[-1.05,0.08660254037844387],[-0.05,0.08660254037844387],[0.1,0],[-0.05,-0.08660254037844387],[-1.05,-0.08660254037844387],[-0.55,-0.9526279441628825],[0.45,-0.9526279441628825],[-0.05,-0.08660254037844387]]
-    tetrahedron_shape = "M -0.065 0.037 L -0.934 -0.477 L -0.054 1.047 Z M 0.065 0.037 L 0.054 1.047 L 0.934 -0.477 Z M 0 -0.075 L 0.88 -0.57 L -0.88 -0.57 Z"
-    octahedron_shape = "M -0.053 0.053 L -0.947 0.053 L -0.053 0.947 Z M 0.053 0.053 L 0.053 0.947 L 0.947 0.053 Z M 0.053 -0.053 L 0.947 -0.053 L 0.053 -0.947 Z M -0.053 -0.053 L -0.053 -0.947 L -0.947 -0.053 Z"
-    dodecahedron_shape = "M -0.341 -0.469 H 0.341 L 0.552 0.179 L 0 0.58 L -0.552 0.179 Z M -0.951 -0.309 L -0.95 0.238 L -0.674 0.149 L -0.458 -0.517 L -0.629 -0.751 Z M -0.588 0.809 L -0.067 0.977 L -0.067 0.687 L -0.633 0.276 L -0.909 0.366 Z M 0.588 0.809 L 0.908 0.366 L 0.633 0.276 L 0.067 0.687 L 0.067 0.977 Z M 0.951 -0.309 L 0.629 -0.751 L 0.458 -0.517 L 0.674 0.149 L 0.95 0.238 Z M 0 -1 L -0.52 -0.83 L -0.35 -0.595 H 0.35 L 0.52 -0.83 Z"
-    icosahedron_shape = "M -0.836 0.482 L -0.127 0.639 L -0.617 -0.209 Z M 0.699 -0.333 L 0.913 0.362 L 0.896 -0.447 Z M 0.638 -0.439 L 0.143 -0.972 L 0.836 -0.553 Z M 0.836 0.482 L 0.617 -0.209 L 0.127 0.639 Z M -0.638 -0.439 L -0.143 -0.972 L -0.836 -0.553 Z M -0.699 -0.333 L -0.913 0.362 L -0.896 -0.447 Z M 0 -0.965 L -0.49 -0.43 H 0.49 Z M -0.061 0.772 L -0.77 0.61 L -0.061 1 Z M 0.061 0.772 L 0.77 0.61 L 0.061 1 Z M 0 0.62 L -0.537 -0.31 L 0.537 -0.31 Z"
-    tesseract_shape = "M 0.47 -0.375 L 0.71 -0.615 L 0.71 0.615 L 0.47 0.375 Z M -0.375 -0.47 L -0.615 -0.71 L 0.615 -0.71 L 0.375 -0.47 Z M -0.47 0.375 L -0.71 0.615 L -0.71 -0.615 L -0.47 -0.375 Z M 0.375 0.47 L 0.615 0.71 L -0.615 0.71 L -0.375 0.47 Z M 0.35 0.35 L 0.35 -0.35 L -0.35 -0.35 L -0.35 0.35 Z"
+    cube_shape = preset.shape.flatCube
+    tetrahedron_shape = preset.shape.flatTetrahedron
+    octahedron_shape = preset.shape.flatOctahedron
+    dodecahedron_shape = preset.shape.flatDodecahedron
+    icosahedron_shape = preset.shape.flatIcosahedron
+    tesseract_shape = preset.shape.flatTesseract
 }
 
 Class.sphere = {
@@ -609,7 +614,7 @@ Class.sphere = {
     SIZE: 9,
     COLOR: {
         BASE: "veryLightGrey",
-        BRIGHTNESS_SHIFT: -15,
+        BRIGHTNESS_SHIFT: -15
     },
     BODY: {
         DAMAGE: 4,
@@ -647,7 +652,7 @@ Class.cube = {
     NAME: "The Cube",
     VALUE: 2e7,
     SIZE: 10,
-    COLOR: "egg",
+    COLOR: "veryLightGrey",
     SHAPE: cube_shape,
     BODY: {
         DAMAGE: 4.8,
@@ -667,7 +672,7 @@ Class.tetrahedron = {
     NAME: "The Tetrahedron",
     VALUE: 3e7,
     SIZE: 12,
-    COLOR: "egg",
+    COLOR: "veryLightGrey",
     SHAPE: tetrahedron_shape,
     BODY: {
         DAMAGE: 6,
@@ -686,7 +691,7 @@ Class.octahedron = {
     NAME: "The Octahedron",
     VALUE: 4e7,
     SIZE: 13,
-    COLOR: "egg",
+    COLOR: "veryLightGrey",
     SHAPE: octahedron_shape,
     BODY: {
         DAMAGE: 6.5,
@@ -705,7 +710,7 @@ Class.dodecahedron = {
     NAME: "The Dodecahedron",
     VALUE: 5e7,
     SIZE: 18,
-    COLOR: "egg",
+    COLOR: "veryLightGrey",
     SHAPE: dodecahedron_shape,
     BODY: {
         DAMAGE: 7,
@@ -724,7 +729,7 @@ Class.icosahedron = {
     NAME: "The Icosahedron",
     VALUE: 1e8,
     SIZE: 20,
-    COLOR: "egg",
+    COLOR: "veryLightGrey",
     SHAPE: icosahedron_shape,
     BODY: {
         DAMAGE: 9,
@@ -745,7 +750,7 @@ Class.tesseract = {
     NAME: "The Tesseract",
     VALUE: 42e7,
     SIZE: 25,
-    COLOR: "egg",
+    COLOR: "veryLightGrey",
     SHAPE: tesseract_shape,
     BODY: {
         DAMAGE: 10,
@@ -773,18 +778,18 @@ Class.presentBW = makePresent("blue", "white")
 // Relics
 for (let [gemColor, name] of [
     [undefined, ""],
-    ["powerGem", "Power"],
-    ["spaceGem", "Space"],
-    ["realityGem", "Reality"],
-    ["soulGem", "Soul"],
-    ["timeGem", "Time"],
-    ["mindGem", "Mind"]
+    ["#a913cf", "Power"],
+    ["#226ef6", "Space"],
+    ["#ff1000", "Reality"],
+    ["#ff9000", "Soul"],
+    ["#00e00b", "Time"],
+    ["#ffd300", "Mind"]
 ]) {
     let gem;
     if (gemColor) {
         gem = Class[name + "Gem"] = {
-            PARENT: 'gem',
-            LABEL: name + ' Gem',
+            PARENT: "gem",
+            LABEL: `${name} Gem`,
             SHAPE: 6,
             COLOR: gemColor
         }
@@ -804,8 +809,8 @@ for (let [gemColor, name] of [
 }
 
 // Tiered Food
-let polyNames = ['egg', 'square', 'triangle', 'pentagon', 'hexagon'],
-    shinyNames = ['', 'shiny', 'legendary', 'shadow', 'rainbow', 'trans'];
+let polyNames = ["egg", "square", "triangle", "pentagon", "hexagon"],
+    shinyNames = ["", "shiny", "legendary", "shadow", "rainbow", "trans"];
 for (let tier = 0; tier < 6; tier++) {
     for (let poly in polyNames) {
         let polyName = polyNames[poly];
@@ -821,7 +826,7 @@ for (let tier = 0; tier < 6; tier++) {
                 parseInt(poly),
                 parseInt(shiny),
                 tier,
-                polyName === 'Triangle' && tier > 0 ? 2 / 3 : 1
+                polyName === "Triangle" && tier > 0 ? 2 / 3 : 1
             );
 
             Class[`laby_${poly}_${tier}_${shiny}_1`] = makeCrasher(

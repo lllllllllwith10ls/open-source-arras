@@ -2,11 +2,11 @@ function init() {
     let useOldMenu = false;
     function selectedEntities(player, run) {
         for (const o of entities.values()) {
-          if (
-            (o !== player.body) != null &&
+            if (
+                (o !== player.body) != null &&
             util.getDistance(o, {
                 x: player.target.x + player.body.x,
-                y: player.target.y + player.body.y,
+                y: player.target.y + player.body.y
             }) <
               o.size * 1
             ) {
@@ -17,12 +17,12 @@ function init() {
     function targetEntities(player, test = () => true) {
         let array = [];
         for (const o of entities.values()) {
-          if (
-            (o !== player.body) != null &&
+            if (
+                (o !== player.body) != null &&
             test(o) &&
             util.getDistance(o, {
                 x: player.target.x + player.body.x,
-                y: player.target.y + player.body.y,
+                y: player.target.y + player.body.y
             }) <
               o.size * 1
             ) {
@@ -34,7 +34,7 @@ function init() {
     function target(player) {
         return {
             x: player.body.x + player.target.x,
-            y: player.body.y + player.target.y,
+            y: player.body.y + player.target.y
         };
     }
     function nearest(array, location, test = () => true) {
@@ -53,7 +53,7 @@ function init() {
         let key = command.displayKey ? command.displayKey : command.keys.map((keys) => keys.map((key) => key[1]).join("+")).join(" / ");
         let description = command.description ?? false;
         let asterisk = command.level > 1 ? "*" : "";
-        let text = ``;
+        let text = "";
         if (name.slice(0, 1).toUpperCase() === key) text = `- [${key}]${name.slice(1)}${asterisk}`;
         else text = `- [${key}] ${name}${asterisk}`;
         if (description) text += ` - ${description}`
@@ -65,30 +65,30 @@ function init() {
         {
             name: "Help",
             description: "Shows this command list",
-            keys: [[[191, "?"]], [[112, "F1"]]],
+            keys: [[["KEY_SPECIAL_HELP", "?"]], [["KEY_SPECIAL_HELP_ALT", "F1"]]],
             level: 1,
             operatorAccess: true,
             run: ({ socket, level, operator }) => {
                 let lines = [
                     "Help menu:",
                     ...commands
-                    .filter(
-                        (c) =>
-                        (level >= c.level || (operator && c.operatorAccess)) && !c.hidden && !c.attribute && !c.skill
-                    )
-                    .map(command => makeHelpList(command)),
-                    "Warning: Avoid zooming all the way out to prevent lagging the server.",
+                        .filter(
+                            (c) =>
+                                (level >= c.level || (operator && c.operatorAccess)) && !c.hidden && !c.attribute && !c.skill
+                        )
+                        .map(command => makeHelpList(command)),
+                    "Warning: Avoid zooming all the way out to prevent lagging the server."
                 ];
                 if (useOldMenu) {
                     for (let line of lines.reverse()) {
                         socket.talk("m", 15_000, line);
                     }
                 } else socket.talk("Em", 15_000, JSON.stringify(lines));
-            },
+            }
         },
         {
             name: "Preset tank #1",
-            keys: [[[49, "1"]]],
+            keys: [[["KEY_SPECIAL_PRESET_1", "1"]]],
             level: 1,
             operatorAccess: true,
             run: ({ player }) => {
@@ -99,7 +99,7 @@ function init() {
         {
             name: "Special Tank",
             description: "Defines you to your token's tank.",
-            keys: [[[50, "2"]]],
+            keys: [[["KEY_SPECIAL_PRESET_2", "2"]]],
             level: 1,
             operatorAccess: true,
             hidden: true,
@@ -118,12 +118,12 @@ function init() {
                     player.body.define({ RESET_UPGRADES: true, BATCH_UPGRADES: false });
                     player.body.define("healer");
                 }
-            },
+            }
         },
         {
             name: "Preset Tank #2",
             description: "Defines you as healer",
-            keys: [[[51, "3"]]],
+            keys: [[["KEY_SPECIAL_PRESET_3", "3"]]],
             level: 1,
             hidden: true,
             run: ({ socket, player }) => {
@@ -135,18 +135,17 @@ function init() {
         },
         {
             name: "Basic",
-            keys: [[[81, "Q"]]],
+            keys: [[["KEY_SPECIAL_BASIC", "Q"]]],
             level: 1,
             operatorAccess: true,
             run: ({ player }) => {
                 player.body.define({ RESET_UPGRADES: true, BATCH_UPGRADES: false });
-                player.body.define("basic");
+                player.body.define(Config.spawn_class);
             }
         },
         {
-            code: "e",
             name: "Teleport",
-            keys: [[[69, "E"]]],
+            keys: [[["KEY_SPECIAL_TELEPORT", "E"]]],
             level: 1,
             operatorAccess: true,
             run: ({ player }) => {
@@ -155,9 +154,8 @@ function init() {
             }
         },
         {
-            code: "k",
             name: "Kill",
-            keys: [[[75, "K"]]],
+            keys: [[["KEY_SPECIAL_KILL", "K"]]],
             level: 1,
             operatorAccess: true,
             run: ({ socket, player }) => {
@@ -168,16 +166,16 @@ function init() {
                     killed++;
                 });
                 if (killed) {
-                    socket.talk( "m", 5_000, `You have killed ${killed} entit${killed === 1 ? "y" : "ies"}.`);
+                    socket.talk("m", 5_000, `You have killed ${killed} entit${killed === 1 ? "y" : "ies"}.`);
                 } else {
                     socket.talk("m", 3_000, "You haven't killed any entity!");
                 }
-            },
+            }
         },
         {
             name: "Whirlpool",
             //description: "Picks the nearest entity at you're cursor.",
-            keys: [[[87, "W"]]],
+            keys: [[["KEY_SPECIAL_WHIRLPOOL", "W"]]],
             level: 1,
             operatorAccess: true,
             run: ({ player }) => {
@@ -186,11 +184,11 @@ function init() {
                 if (!e) e = player.body.store.selectedWhirlpool = nearest(entities, t);
                 e.x = t.x;
                 e.y = t.y;
-            },
+            }
         },
         {
             name: "Whirlpool",
-            keys: [[[-87, "W"]]],
+            keys: [[["-KEY_SPECIAL_WHIRLPOOL", "W"]]],
             level: 1,
             hidden: true,
             run: ({ player }) => {
@@ -199,7 +197,7 @@ function init() {
         },
         {
             name: "Drag",
-            keys: [[[68, "D"]]],
+            keys: [[["KEY_SPECIAL_DRAG", "D"]]],
             level: 1,
             operatorAccess: true,
             run({ socket, player }) {
@@ -230,49 +228,63 @@ function init() {
                         }
                         let tx = player.body.x + player.target.x;
                         let ty = player.body.y + player.target.y;
-                        for (let { e: entity, dx, dy } of dragged)
-                        if (!entity.isGhost) {
-                            entity.x = dx + tx;
-                            entity.y = dy + ty;
-                        } else {
-                            clearInterval(body.store.dragInterval);
-                            delete body.store.dragInterval;
+                        for (let { e: entity, dx, dy } of dragged) {
+                            if (!entity.isGhost) {
+                                entity.x = dx + tx;
+                                entity.y = dy + ty;
+                            } else {
+                                clearInterval(body.store.dragInterval);
+                                delete body.store.dragInterval;
+                            } 
                         }
                     });
                 }
-            },
+            }
         },
         {
             name: "Drag",
-            keys: [[[-68, "D"]]],
+            keys: [[["-KEY_SPECIAL_DRAG", "D"]]],
             hidden: true,
             level: 1,
             operatorAccess: true,
             run({ player }) {
-              clearInterval(player.body.store.dragInterval);
-              delete player.body.store.dragInterval;
-            },
+                clearInterval(player.body.store.dragInterval);
+                delete player.body.store.dragInterval;
+            }
         },
         {
             name: "Color",
-            keys: [[[67, "C"]]],
+            keys: [[["KEY_SPECIAL_COLOR", "C"]]],
             level: 1,
             operatorAccess: true,
             run: ({ player }) => {
+                const colors = [
+                    "teal", "shiny", "triangle",
+                    "yellow", "lavender", "aqua",
+                    "crasher", "egg", "wall", 
+                    "pureWhite", "black", "blue",
+                    "green", "red", "square",
+                    "pentagon", "magenta", "grey",
+                    "rogue", "white", "pureBlack",
+                    "animatedBlueRed", "animatedBlueGrey", "animatedGreyBlue",
+                    "animatedRedGrey", "animatedGreyRed", "mustard",
+                    "tangerine", "brown", "cyan", 
+                    "lesbian", "rainbow", "trans",
+                    "trueTrans", "bi", "animatedMagenta"
+                ]
                 let target = targetEntities(player);
                 if (target.length) {
                     let o = target[0];
-                    if (o.color.base > 42) {
-                        o.color.base = 1;
-                    }
-                    o.color.base += 1;
+                    const color = typeof o.color.base === "number" ? colors[o.color.base + 1] : colors[colors.indexOf(o.color.base) + 1];
+                    if (!color) return o.color.base = colors[0];
+                    o.color.base = color;
                 }
             }
         },
         {
             name: "Wall",
             //description: "Spawns wall at your cursor",
-            keys: [[[88, "X"]]],
+            keys: [[["KEY_SPECIAL_WALL", "X"]]],
             level: 1,
             operatorAccess: true,
             run: ({ socket, player, gameManager }) => {
@@ -300,7 +312,7 @@ function init() {
                             wall: o,
                             target: pt,
                             position: pos,
-                            size: gameManager.room.wallGrid.width / gameManager.room.wallGrid.xgrid / 2,
+                            size: gameManager.room.wallGrid.width / gameManager.room.wallGrid.xgrid / 2
                         };
                     } else {
                         for (let wall of checkWall) {
@@ -340,7 +352,7 @@ function init() {
         },
         {
             name: "Wall Type", 
-            keys: [[[90, "Z"]]],
+            keys: [[["KEY_SPECIAL_WALL_TYPE", "Z"]]],
             level: 1,
             operatorAccess: true,
             run: ({ player }) => {
@@ -366,17 +378,17 @@ function init() {
         },
         {
             name: "Wall",
-            keys: [[[-88, "X"]]],
+            keys: [[["-KEY_SPECIAL_WALL", "X"]]],
             level: 1,
             hidden: true,
             operatorAccess: true,
             run({ player }) {
                 delete player.body.store.wallCMD;
-            },
+            }
         },
         {
             name: "Vanish",
-            keys: [[[86, "V"]]],
+            keys: [[["KEY_SPECIAL_VANISH", "V"]]],
             level: 1,
             operatorAccess: true,
             run: ({ player }) => {
@@ -403,7 +415,7 @@ function init() {
         },
         {
             name: "Invulnerable",
-            keys: [[[73, "I"]]],
+            keys: [[["KEY_SPECIAL_INVINCIBLE", "I"]]],
             level: 1,
             operatorAccess: true,
             run: ({ socket, player }) => {
@@ -414,7 +426,7 @@ function init() {
         {
             name: "Team",
             //description: "Changes team at the selected entity.",
-            keys: [[[84, "T"]]],
+            keys: [[["KEY_SPECIAL_TEAM", "T"]]],
             level: 1,
             operatorAccess: true,
             run: ({ player, socket }) => {
@@ -457,11 +469,11 @@ function init() {
                     }
                 }
                 socket.talk("m", 5_000, `Changed to team ${changedTeamToEntity ? changedTeamToEntity.team : player.body.team}`);
-            },
+            }
         },
         {
             name: "Invite to team",
-            keys: [[[89, "Y"]]],
+            keys: [[["KEY_SPECIAL_TEAM_INVITE", "Y"]]],
             level: 1,
             operatorAccess: true,
             run: ({ player, socket }) => {
@@ -475,7 +487,7 @@ function init() {
         },
         {
             name: "Heal",
-            keys: [[[72, "H"]]],
+            keys: [[["KEY_SPECIAL_HEAL", "H"]]],
             level: 1,
             operatorAccess: true,
             run: ({ socket, player }) => {
@@ -513,7 +525,7 @@ function init() {
         },*/
         {
             name: "Skill",
-            keys: [[[83, "S"], [191, "/"]], [[83, "S"], [112, "F1"]]],
+            keys: [[["KEY_SPECIAL_SKILL", "S"], ["KEY_SPECIAL_HELP", "/"]], [["KEY_SPECIAL_SKILL", "S"], ["KEY_SPECIAL_HELP_ALT", "F1"]]],
             displayKey: "S+?",
             level: 1,
             operatorAccess: true,
@@ -521,22 +533,22 @@ function init() {
                 let lines = [
                     "Help menu:",
                     ...commands
-                    .filter(
-                        (c) =>
-                        (level >= c.level || (operator && c.operatorAccess)) && !c.hidden && c.skill
-                    )
-                    .map(command => makeHelpList(command, false))
+                        .filter(
+                            (c) =>
+                                (level >= c.level || (operator && c.operatorAccess)) && !c.hidden && c.skill
+                        )
+                        .map(command => makeHelpList(command, false))
                 ];
                 if (useOldMenu) {
                     for (let line of lines.reverse()) {
                         socket.talk("m", 15_000, line);
                     }
                 } else socket.talk("Em", 15_000, JSON.stringify(lines));
-            },
+            }
         },
         {
             name: "Reset skills",
-            keys: [[[83, "S"], [82, "R"]]],
+            keys: [[["KEY_SPECIAL_SKILL", "S"], ["KEY_SPECIAL_SKILL_RESET", "R"]]],
             skill: true,
             level: 1,
             operatorAccess: true,
@@ -550,25 +562,25 @@ function init() {
                 player.body.syncTurrets();
                 player.body.refreshBodyAttributes();
                 
-            },
+            }
         },
         {
             name: "Clear skills",
-            keys: [[[83, "S"], [67, "C"]]],
+            keys: [[["KEY_SPECIAL_SKILL", "S"], ["KEY_SPECIAL_SKILL_CLEAR", "C"]]],
             skill: true,
             level: 1,
             operatorAccess: true,
             run: ({ player }) => {
-                let refundedSkillPoints = player.body.skill.raw.reduce((total, amount)=> total + amount, 0);
+                let refundedSkillPoints = player.body.skill.raw.reduce((total, amount) => total + amount, 0);
                 player.body.skill.set(Array(10).fill(0));
                 player.body.skill.points += refundedSkillPoints;
                 player.body.syncTurrets();
                 player.body.refreshBodyAttributes();
-            },
+            }
         },
         {
             name: "Maximize skills",
-            keys: [[[83, "S"], [77, "M"]]],
+            keys: [[["KEY_SPECIAL_SKILL", "S"], ["KEY_SPECIAL_SKILL_MAX", "M"]]],
             skill: true,
             level: 1,
             operatorAccess: true,
@@ -576,11 +588,11 @@ function init() {
                 player.body.skill.set(player.body.skill.caps);
                 player.body.syncTurrets();
                 player.body.refreshBodyAttributes();
-            },
+            }
         },
         {
             name: "Remove skill point",
-            keys: [[[83, "S"], [68, "D"]]],
+            keys: [[["KEY_SPECIAL_SKILL", "S"], ["KEY_SPECIAL_SKILL_REMOVE", "D"]]],
             skill: true,
             level: 1,
             operatorAccess: true,
@@ -588,70 +600,70 @@ function init() {
                 player.body.skill.points = Math.max(0, player.body.skill.points - 1);
                 player.body.syncTurrets();
                 player.body.refreshBodyAttributes();
-            },
+            }
         },
         {
             name: "Add skill point",
-            keys: [[[83, "S"], [70, "F"]]],
+            keys: [[["KEY_SPECIAL_SKILL", "S"], ["KEY_SPECIAL_SKILL_ADD", "F"]]],
             skill: true,
             level: 1,
             operatorAccess: true,
             run: ({ player }) => {
-                let currentUsedPoints = player.body.skill.raw.reduce((total, v)=> total+v, 0);
+                let currentUsedPoints = player.body.skill.raw.reduce((total, v) => total+v, 0);
                 let maxSkills = player.body.skill.caps.reduce((total, capAmount) => total + capAmount, 0);
                 player.body.skill.points = Math.min(maxSkills - currentUsedPoints, player.body.skill.points + 1);
                 player.body.syncTurrets();
                 player.body.refreshBodyAttributes();
-            },
+            }
         },
         {
             name: "Reduce skill cap",
-            keys: [[[83, "S"], [71, "G"]]],
+            keys: [[["KEY_SPECIAL_SKILL", "S"], ["KEY_SPECIAL_SKILL_CAP_REMOVE", "G"]]],
             skill: true,
             level: 1,
             operatorAccess: true,
             run: ({ player }) => {
-                let newSkillCaps = player.body.skill.caps.map((x)=> Math.max(0, x - 1));
+                let newSkillCaps = player.body.skill.caps.map((x) => Math.max(0, x - 1));
                 let maxSkillPoints = newSkillCaps.reduce((total, x) => total + x, 0);
                 player.body.skill.setCaps(newSkillCaps);
                 maxSkillPoints -= player.body.skill.raw.reduce((total, x) => total + x, 0);
                 player.body.skill.points = Math.min(player.body.skill.points, maxSkillPoints);
                 player.body.syncTurrets();
                 player.body.refreshBodyAttributes();
-            },
+            }
         },
         {
             name: "Increase skill cap",
-            keys: [[[83, "S"], [72, "H"]]],
+            keys: [[["KEY_SPECIAL_SKILL", "S"], ["KEY_SPECIAL_SKILL_CAP_ADD", "H"]]],
             skill: true,
             level: 1,
             operatorAccess: true,
             run: ({ player }) => {
-                let skills = player.body.skill.caps.map((cap)=> cap = Math.min(20, cap + 1));
+                let skills = player.body.skill.caps.map((cap) => cap = Math.min(20, cap + 1));
                 player.body.skill.setCaps(skills);
                 player.body.syncTurrets();
                 player.body.refreshBodyAttributes();
-            },
+            }
         },
         {
             name: "Get Data",
-            keys: [[[71, "G"]]],
+            keys: [[["KEY_SPECIAL_DATA", "G"]]],
             level: 1,
             run: ({ socket, player }) => {
-                selectedEntities(player, (o) => {
-                    if (o.bond) return;
-                    let message = [
-                        `Selected ${o.name || (o.isPlayer ? "an unnamed player" : "a")}${(o.name || o.isPlayer) ? "'s" : ""} ${o.label} (ID #${o.id}).`,
-                        `Score: ${o.skill.score};`,
-                        `Build: ${o.skill.raw.join("/")};`
-                    ]
-                    socket.talk("Em", 20_000, JSON.stringify(message));
-                });
+                const t = target(player);
+                const e = nearest(entities, t);
+                if (e.bond) return;
+                let message = [
+                    `Selected ${e.name || (e.isPlayer ? "an unnamed player" : "a")}${(e.name || e.isPlayer) ? "'s" : ""} ${e.label} (ID #${e.id}).`,
+                    `Score: ${e.skill.score};`,
+                    `Build: ${e.skill.raw.join("/")};`
+                ]
+                socket.talk("Em", 20_000, JSON.stringify(message));
             }
         },
         {
             name: "Infinite level up",
-            keys: [[[78, "N"]]],
+            keys: [[["KEY_SPECIAL_LEVEL_UP", "N"]]],
             level: 1,
             operatorAccess: true,
             run: ({ player }) => {
@@ -662,22 +674,22 @@ function init() {
         },
         {
             name: "Police",
-            keys: [[[80, "P"]]],
+            keys: [[["KEY_SPECIAL_POLICE", "P"]]],
             level: 1,
             run: ({ player, gameManager }) => {
-                player.body.define({RESET_UPGRADES: true});
-                player.body.define("undercoverCop");
-                player.body.name = "TEAM POLICE";
-                let skills = Array(10).fill(15);
-                player.body.skill.setCaps(skills);
-                player.body.skill.set(skills);
-                player.body.FOV = 2;
+                player.body.define({ RESET_UPGRADES: true, BATCH_UPGRADES: false });
+                player.body.define("arrasPolice");
+                player.body.name = "ARRAS POLICE";
+                player.body.skill.set(player.body.skill.caps);
+                player.body.syncTurrets();
+                player.body.refreshBodyAttributes();
+                player.body.FOV = 10000;
                 gameManager.socketManager.broadcast("WOOP WOOP! That's the sound of da police!");
             }
         },
         {
             name: "Blast",
-            keys: [[[66, "B"]]],
+            keys: [[["KEY_SPECIAL_BLAST", "B"]]],
             level: 1,
             operatorAccess: true,
             run: ({ player }) => {
@@ -701,7 +713,7 @@ function init() {
         },
         {
             name: "Attribute",
-            keys: [[[65, "A"], [191, "/"]], [[65, "A"], [112, "F1"]]],
+            keys: [[["KEY_SPECIAL_ATTRIBUTE", "A"], ["KEY_SPECIAL_HELP", "/"]], [["KEY_SPECIAL_ATTRIBUTE", "A"], ["KEY_SPECIAL_HELP_ALT", "F1"]]],
             displayKey: "A+?",
             level: 1,
             operatorAccess: true,
@@ -709,22 +721,22 @@ function init() {
                 let lines = [
                     "Help menu:",
                     ...commands
-                    .filter(
-                        (c) =>
-                        (level >= c.level || (operator && c.operatorAccess)) && !c.hidden && c.attribute
-                    )
-                    .map(command => makeHelpList(command, false))
+                        .filter(
+                            (c) =>
+                                (level >= c.level || (operator && c.operatorAccess)) && !c.hidden && c.attribute
+                        )
+                        .map(command => makeHelpList(command, false))
                 ];
                 if (useOldMenu) {
                     for (let line of lines.reverse()) {
                         socket.talk("m", 15_000, line);
                     }
                 } else socket.talk("Em", 15_000, JSON.stringify(lines));
-            },
+            }
         },
         {
             name: "All team minimap",
-            keys: [[[65, "A"], [84, "T"]]],
+            keys: [[["KEY_SPECIAL_ATTRIBUTE", "A"], ["KEY_SPECIAL_ATTRIBUTE_MINIMAP_TEAM", "T"]]],
             attribute: true,
             level: 1,
             operatorAccess: true,
@@ -732,11 +744,11 @@ function init() {
                 socket.status.seesAllTeams = !socket.status.seesAllTeams;
                 socket.status.needsNewBroadcast = true;
                 socket.talk("m", 5_000, `${socket.status.seesAllTeams ? "Enabled" : "Disabled"} Attribute: all team minimap.`);
-            },
+            }
         },
         {
             name: "Hidden from minimap",
-            keys: [[[65, "A"], [77, "M"]]],
+            keys: [[["KEY_SPECIAL_ATTRIBUTE", "A"], ["KEY_SPECIAL_ATTRIBUTE_MINIMAP_HIDE", "M"]]],
             attribute: true,
             level: 1,
             operatorAccess: true,
@@ -747,7 +759,7 @@ function init() {
         },
         {
             name: "Shown on leaderboard",
-            keys: [[[65, "A"], [76, "L"]]],
+            keys: [[["KEY_SPECIAL_ATTRIBUTE", "A"], ["KEY_SPECIAL_ATTRIBUTE_LEADERBOARD", "L"]]],
             attribute: true,
             level: 1,
             operatorAccess: true,
@@ -758,7 +770,7 @@ function init() {
         },
         {
             name: "No reload cooldown",
-            keys: [[[65, "A"], [67, "C"]]],
+            keys: [[["KEY_SPECIAL_ATTRIBUTE", "A"], ["KEY_SPECIAL_ATTRIBUTE_RELOAD", "C"]]],
             attribute: true,
             level: 1,
             operatorAccess: true,
@@ -769,7 +781,7 @@ function init() {
         },
         {
             name: "No recoil",
-            keys: [[[65, "A"], [82, "R"]]],
+            keys: [[["KEY_SPECIAL_ATTRIBUTE", "A"], ["KEY_SPECIAL_ATTRIBUTE_RECOIL", "R"]]],
             attribute: true,
             level: 1,
             operatorAccess: true,
@@ -780,7 +792,7 @@ function init() {
         },
         {
             name: "No arena boundary force",
-            keys: [[[65, "A"], [79, "O"]]],
+            keys: [[["KEY_SPECIAL_ATTRIBUTE", "A"], ["KEY_SPECIAL_ATTRIBUTE_ARENA_EDGE", "O"]]],
             attribute: true,
             level: 1,
             operatorAccess: true,
@@ -791,18 +803,18 @@ function init() {
         },
         {
             name: "Pass through walls",
-            keys: [[[65, "A"], [87, "W"]]],
+            keys: [[["KEY_SPECIAL_ATTRIBUTE", "A"], ["KEY_SPECIAL_ATTRIBUTE_WALL", "W"]]],
             attribute: true,
             level: 1,
             operatorAccess: true,
             run: ({ socket }) => {
-              socket.player.body.ac = !socket.player.body.ac;
-              socket.talk("m", 5_000, `${socket.player.body.ac ? "Enabled" : "Disabled"} Attribute: pass through walls.`);
-            },
+                socket.player.body.ac = !socket.player.body.ac;
+                socket.talk("m", 5_000, `${socket.player.body.ac ? "Enabled" : "Disabled"} Attribute: pass through walls.`);
+            }
         },
         {
             name: "Accepts score",
-            keys: [[[65, "A"], [75, "K"]]],
+            keys: [[["KEY_SPECIAL_ATTRIBUTE", "A"], ["KEY_SPECIAL_ATTRIBUTE_SCORE", "K"]]],
             attribute: true,
             level: 1,
             operatorAccess: true,
@@ -813,7 +825,7 @@ function init() {
         },
         {
             name: "Ban",
-            keys: [[[79, "O"]]],
+            keys: [[["KEY_SPECIAL_BAN", "O"]]],
             level: 2,
             run: ({ socket, player }) => {
                 const types = 2,
@@ -826,7 +838,7 @@ function init() {
                             o.isPlayer &&
                             util.getDistance(o, {
                                 x: player.target.x + player.body.x,
-                                y: player.target.y + player.body.y,
+                                y: player.target.y + player.body.y
                             }) < o.size * 1
                         ) {
                             found = o;
@@ -859,7 +871,7 @@ function init() {
         },
         {
             name: "Zoom-out",
-            keys: [[[189, "-"]]],
+            keys: [[["KEY_SPECIAL_ZOOM_OUT", "-"]]],
             level: 1,
             operatorAccess: true,
             run: ({ player }) => {
@@ -868,7 +880,7 @@ function init() {
         },
         {
             name: "Zoom-in",
-            keys: [[[187, "+"]]],
+            keys: [[["KEY_SPECIAL_ZOOM_IN", "+"]]],
             level: 1,
             operatorAccess: true,
             run: ({ player }) => {
@@ -877,7 +889,7 @@ function init() {
         },
         {
             name: "Clear zoom",
-            keys: [[[48, "0"]]],
+            keys: [[["KEY_SPECIAL_ZOOM_CLEAR", "0"]]],
             level: 1,
             operatorAccess: true,
             run: ({ player }) => {
@@ -886,7 +898,7 @@ function init() {
         },
         {
             name: "Smaller",
-            keys: [[[188, ","]]],
+            keys: [[["KEY_SPECIAL_SMALLER", ","]]],
             level: 1,
             operatorAccess: true,
             run: ({ player }) => {
@@ -899,7 +911,7 @@ function init() {
         },
         {
             name: "Bigger",
-            keys: [[[190, "."]]],
+            keys: [[["KEY_SPECIAL_BIGGER", "."]]],
             level: 1,
             operatorAccess: true,
             run: ({ player }) => {
@@ -911,10 +923,8 @@ function init() {
             }
         },
         {
-            name: "Operator access",
-            description: "Gives player operator access.",
-            keys: [[[186]], [[59]]],
-            displayKey: ";",
+            name: "Promote user",
+            keys: [[["KEY_SPECIAL_PROMOTE", ";"]]],
             level: 1,
             operatorAccess: true,
             run: ({ player }) => {
@@ -922,7 +932,7 @@ function init() {
                     if (o.isPlayer && o.socket) {
                         if (o.hasOperator) {
                             if (o.socket.permissions && o.socket.permissions.level > 1) {
-                                player.body.sendMessage("This player is already an operator!");
+                                player.body.sendMessage("You do not have sufficient permission to promote this player!");
                             } else {
                                 o.hasOperator = false;
                                 o.socket.talk("m", 8_000, "You are no longer an operator.");
@@ -938,7 +948,35 @@ function init() {
                         player.body.sendMessage("Operator access given to " + `${o.name === "" ? "A unnamed Player" : o.name}` + ".");
                     }
                 });
-            },
+            }
+        },
+        {
+            name: "Demote user",
+            keys: [[["KEY_SPECIAL_DEMOTE", "'"]]],
+            level: 1,
+            operatorAccess: true,
+            run: ({ player }) => {
+                selectedEntities(player, (o) => {
+                    if (o.isPlayer && o.socket) {
+                        if (o.hasOperator) {
+                            if (o.socket.permissions && o.socket.permissions.level > 1) {
+                                player.body.sendMessage("You do not have sufficient permission to demote this player!");
+                            } else {
+                                o.hasOperator = false;
+                                o.socket.talk("m", 8_000, "You are no longer an operator.");
+                                player.body.sendMessage(
+                                    "Operator access removed to " + `${o.name === "" ? "A unnamed Player" : o.name}` + "."
+                                );
+                            }
+                            return 1;
+                        }
+                        o.hasOperator = true;
+                        o.socket.status.hasOperator = true;
+                        o.socket.talk("m", 8_000, "You are now an operator.");
+                        player.body.sendMessage("Operator access given to " + `${o.name === "" ? "A unnamed Player" : o.name}` + ".");
+                    }
+                });
+            }
         },
         {
             name: "Unknown",
@@ -952,33 +990,33 @@ function init() {
                     socket.talk("m", 10_000, "Press ` + ¹ or ` + / for help.");
                 }
             }
-        },
+        }
     ];
-    global.runKeyCommand = (socket, keyCodes) => {
+    global.runKeyCommand = (socket, codes) => {
         if (!socket?.player?.body) return 1;
       
         let permsLevel = socket.permissions?.level;
         if (!permsLevel) permsLevel = 0;
-        if (!keyCodes.length) keyCodes = ["default"];
+        if (!codes.length) codes = ["default"];
         let command = commands.find((command) =>
-          command.keys.some((keys) =>
-            keys.every((key, index) => key[0] === keyCodes[index])
-          )
+            command.keys.some((keys) =>
+                keys.every((key, index) => key[0] === codes[index])
+            )
         );
         if (command && (permsLevel >= command.level || (command.operatorAccess && socket.player.body.hasOperator))) {
-          try {
-            command.run({
-              socket,
-              player: socket.player,
-              level: permsLevel,
-              operator: socket.player.body.hasOperator,
-              gameManager: global.gameManager,
-            });
-            socket.player.body.refreshBodyAttributes();
-            socket.player.body.minimapColor = "lime";
-          } catch (e) {
-            console.error(`${command.name.toLowerCase()} key command error`, e);
-          }
+            try {
+                command.run({
+                    socket,
+                    player: socket.player,
+                    level: permsLevel,
+                    operator: socket.player.body.hasOperator,
+                    gameManager: global.gameManager
+                });
+                socket.player.body.refreshBodyAttributes();
+                socket.player.body.minimapColor = "lime";
+            } catch(e) {
+                console.error(`${command.name.toLowerCase()} key command error`, e);
+            }
         }
     };
 }

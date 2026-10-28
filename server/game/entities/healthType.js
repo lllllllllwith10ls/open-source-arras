@@ -21,7 +21,7 @@ class HealthType {
                 return Math.max(capped
                     ? Math.min(amount * this.permeability, this.amount)
                     : amount * this.permeability,
-                    damageToMax);
+                damageToMax);
             case "static":
                 return Math.max(
                     capped ? Math.min(amount, this.amount) : amount,

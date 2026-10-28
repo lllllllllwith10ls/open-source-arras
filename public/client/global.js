@@ -85,7 +85,7 @@ let Region = (size) => {
             if (index >= data.length) {
                 console.log(index);
                 console.log(data);
-                throw new Error('Trying to reference a clickable outside a region!');
+                throw new Error("Trying to reference a clickable outside a region!");
             }
             data[index].set(...a);
         },
@@ -99,70 +99,119 @@ let Region = (size) => {
 let gameDraw;
 
 const global = {
-    // Keys and other mathematical constants. You can find the list here: https://developer.mozilla.org/en-US/docs/Web/API/KeyboardEvent/keyCode
-    // Special key for cheats / commands
-    KEY_SPECIAL: 192, // `
+    // Keys and other mathematical constants.
+    KEY_AUTO_FIRE: "KeyE",
+    KEY_AUTO_ALT: "KeyX",
+    KEY_AUTO_SPIN: "KeyC",
+    KEY_SPIN_LOCK: "KeyG",
+    KEY_OVERRIDE: "KeyR",
+    KEY_LEVEL_UP: "KeyN",
+    KEY_ABILITY: "KeyF",
+    //KEY_PAUSE: "KeyG",
+    KEY_REVERSE_TANK: "KeyV",
+    KEY_REVERSE_MOUSE: "KeyB",
+    KEY_SCREENSHOT: "KeyQ",
+    KEY_SKILL_MAX: "KeyM",
+    KEY_CLASS_TREE: "KeyT",
+    KEY_RECORD: "KeyZ",
+    KEY_PING: "KeyL",
 
-    KEY_ESC: 27,// Escape
-    KEY_ENTER: 13,// Enter
-    KEY_SHIFT: 16,// Shift
-    KEY_BECOME: 70,// F
-    KEY_CHAT: 13,// Enter
-    KEY_FIREFOOD: 119,// F8
-    KEY_SPLIT: 32,// Space
+    KEY_UP: "KeyW",
+    KEY_LEFT: "KeyA",
+    KEY_DOWN: "KeyS",
+    KEY_RIGHT: "KeyD",
 
-    KEY_LEFT: 65,// A
-    KEY_UP: 87,// W
-    KEY_RIGHT: 68,// D
-    KEY_DOWN: 83,// S
-    KEY_LEFT_ARROW: 37,// ArrowLeft
-    KEY_UP_ARROW: 38,// ArrowUp
-    KEY_RIGHT_ARROW: 39,// ArrowRight
-    KEY_DOWN_ARROW: 40,// ArrowDown
+    KEY_UPGRADE_1: "KeyY",
+    KEY_UPGRADE_2: "KeyU",
+    KEY_UPGRADE_3: "KeyI",
+    KEY_UPGRADE_4: "KeyH",
+    KEY_UPGRADE_5: "KeyJ",
+    KEY_UPGRADE_6: "KeyK",
 
-    KEY_AUTO_SPIN: 67,// C
-    KEY_AUTO_FIRE: 69,// E
-    KEY_AUTO_ALT: 71,// G
-    KEY_OVER_RIDE: 82,// R
-    KEY_REVERSE_TANK: 86,// V
-    KEY_REVERSE_MOUSE: 66,// B
-    KEY_SPIN_LOCK: 88,// X
+    KEY_SKILL_1: "Digit1",
+    KEY_SKILL_2: "Digit2",
+    KEY_SKILL_3: "Digit3",
+    KEY_SKILL_4: "Digit4",
+    KEY_SKILL_5: "Digit5",
+    KEY_SKILL_6: "Digit6",
+    KEY_SKILL_7: "Digit7",
+    KEY_SKILL_8: "Digit8",
+    KEY_SKILL_9: "Digit9",
+    KEY_SKILL_10: "Digit0",
 
-    KEY_LEVEL_UP: 78, // N
-    KEY_TOKEN: 80,// P
-    KEY_CLASS_TREE: 84,// T
-    KEY_MAX_STAT: 77,// M
-    KEY_SUICIDE: 79,// O
-    KEY_ZOOM_OUT: 45,// ??
-    KEY_ZOOM_IN: 61,// ??
-    KEY_DEBUG: 76,// L
+    KEY_MOUSE_0: "Space",
+    KEY_MOUSE_2: "ShiftLeft",
 
-    KEY_SCREENSHOT: 81,//Q
-    KEY_RECORD: 90,//Z
+    KEY_SUICIDE: "KeyO",
 
-    KEY_UPGRADE_ATK: 49,// 1
-    KEY_UPGRADE_HTL: 50,// 2
-    KEY_UPGRADE_SPD: 51,// 3
-    KEY_UPGRADE_STR: 52,// 4
-    KEY_UPGRADE_PEN: 53,// 5
-    KEY_UPGRADE_DAM: 54,// 6
-    KEY_UPGRADE_RLD: 55,// 7
-    KEY_UPGRADE_MOB: 56,// 8
-    KEY_UPGRADE_RGN: 57,// 9
-    KEY_UPGRADE_SHI: 48,// 0
-    KEY_MOUSE_0: 32,// 32
-    KEY_MOUSE_1: 86,// V
-    KEY_MOUSE_2: 16,// ShiftLeft
-    KEY_CHOOSE_1: 89,// Y
-    KEY_CHOOSE_2: 85,// U
-    KEY_CHOOSE_3: 73,// I
-    KEY_CHOOSE_4: 72,// H
-    KEY_CHOOSE_5: 74,// J
-    KEY_CHOOSE_6: 75,// K
+    KEY_SPECIAL: "Backquote",
+    KEY_SPECIAL_HELP: "Slash",
+    KEY_SPECIAL_HELP_ALT: "F1",
+
+    KEY_SPECIAL_PRESET_1: "Digit1",
+    KEY_SPECIAL_PRESET_2: "Digit2",
+    KEY_SPECIAL_PRESET_3: "Digit3",
+    KEY_SPECIAL_BASIC: "KeyQ",
+
+    KEY_SPECIAL_TELEPORT: "KeyE",
+    KEY_SPECIAL_KILL: "KeyK",
+    KEY_SPECIAL_WHIRLPOOL: "KeyW",
+    KEY_SPECIAL_DRAG: "KeyD",
+    KEY_SPECIAL_COLOR: "KeyC",
+
+    KEY_SPECIAL_WALL: "KeyX",
+    KEY_SPECIAL_WALL_TYPE: "KeyZ",
+
+    KEY_SPECIAL_VANISH: "KeyV",
+    KEY_SPECIAL_INVINCIBLE: "KeyI",
+
+    KEY_SPECIAL_TEAM: "KeyT",
+    KEY_SPECIAL_TEAM_INVITE: "KeyY",
+
+    KEY_SPECIAL_HEAL: "KeyH",
+
+    KEY_SPECIAL_SKILL: "KeyS",
+    KEY_SPECIAL_SKILL_RESET: "KeyR",
+    KEY_SPECIAL_SKILL_CLEAR: "KeyC",
+    KEY_SPECIAL_SKILL_MAX: "KeyM",
+    KEY_SPECIAL_SKILL_REMOVE: "KeyD",
+    KEY_SPECIAL_SKILL_ADD: "KeyF",
+    KEY_SPECIAL_SKILL_CAP_REMOVE: "KeyG",
+    KEY_SPECIAL_SKILL_CAP_ADD: "KeyH",
+
+    KEY_SPECIAL_DATA: "KeyG",
+    KEY_SPECIAL_LEVEL_UP: "KeyN",
+    KEY_SPECIAL_POLICE: "KeyP",
+    KEY_SPECIAL_BLAST: "KeyB",
+
+    KEY_SPECIAL_ATTRIBUTE: "KeyA",
+    KEY_SPECIAL_ATTRIBUTE_MINIMAP_TEAM: "KeyT",
+    KEY_SPECIAL_ATTRIBUTE_MINIMAP_HIDE: "KeyM",
+    KEY_SPECIAL_ATTRIBUTE_LEADERBOARD: "KeyL",
+    KEY_SPECIAL_ATTRIBUTE_RELOAD: "KeyC",
+    KEY_SPECIAL_ATTRIBUTE_RECOIL: "KeyR",
+    KEY_SPECIAL_ATTRIBUTE_ARENA_EDGE: "KeyO",
+    KEY_SPECIAL_ATTRIBUTE_WALL: "KeyW",
+    KEY_SPECIAL_ATTRIBUTE_SCORE: "KeyK",
+
+    KEY_SPECIAL_BAN: "KeyO",
+
+    KEY_SPECIAL_ZOOM_OUT: "Minus",
+    KEY_SPECIAL_ZOOM_IN: "Equal",
+    KEY_SPECIAL_ZOOM_CLEAR: "Digit0",
+
+    KEY_SPECIAL_SMALLER: "Comma",
+    KEY_SPECIAL_BIGGER: "Period",
+
+    KEY_SPECIAL_PROMOTE: "Semicolon",
+    KEY_SPECIAL_DEMOTE: "Quote",
+
+    KEY_ABILITIES: ["KEY_SPECIAL_ATTRIBUTE", "KEY_SPECIAL_SKILL"],
 
     showTree: false,
     scrollX: 0,
     realScrollX: 0,
+
     // Canvas
     screenWidth: window.innerWidth,
     screenHeight: window.innerHeight,
@@ -187,8 +236,8 @@ const global = {
     generateTankTree: false,
     specialPressed: false,
     specialKeysPressed: [],
-    backgroundColor: '#f2fbff',
-    lineColor: '#000000',
+    backgroundColor: "#F2FBFF",
+    lineColor: "#000000",
     nameColor: "#FFFFFF",
     message: "",
     player: {},
@@ -222,6 +271,8 @@ const global = {
             switchButton: Region(2),
             toggleBoxes: Region(100),
             HoverBoxes: Region(100),
+            optionBoxes: Region(50),
+            mainMenuIdle: Clickable(),
         }
     },
     dailyTankAd: {
@@ -263,7 +314,8 @@ const global = {
         mspt: 0,
     },
     advanced: {
-        roundMap: false,
+        arenaShape: "rect",
+        roundArena: false,
         blackout: {
             active: false,
             color: "#000000"
@@ -291,6 +343,7 @@ const global = {
         renderPlayerScores: false,
         renderPlayerBars: false,
         renderPlayerKillbar: false,
+        renderIngameOptions: false,
         minimapReducedInfo: false,
         fullHDMode: false,
     },
@@ -334,13 +387,15 @@ const global = {
             switchMenu_button: util.Smoothbar(0, 2, 3, 0.08, 0.025, true),
             optionsButtonProgress: util.Smoothbar(0, 2, 0.1, 0.08, 0.025, true),
             mainMenu: util.Smoothbar(-500, 2, 3, 0.08, 0.025, true),
-            mainMenuHeight: util.Smoothbar(730, 2, 3, 0.08, 0.025, true),
+            mainMenuHeight: util.Smoothbar(770, 2, 3, 0.08, 0.025, true),
             isOpened: false,
             tabClickables: Region(10),  // Pre-initialize for up to 10 tabs
             themeClickables: Region(100),
             activeTab: 0, // 0=Options, 1=Theme, 2=Keybinds, 3=Secret
-            tabs: [["Options", 730], ["Theme", 610], ["Keybinds", 730]],
+            tabs: [["Options", 770], ["Theme", 610], ["Keybinds", 730]],
             tabSlideAnim: util.Smoothbar(0, 0.3, 1.5, 0.03, 0.025, true),
+            sliderMoving: false,
+            currentOptionMenu: false
         };
         let list = {
             // Set up the player
@@ -382,7 +437,7 @@ const global = {
             time: 0,
             screenWidth: global.screenWidth,
             screenHeight: global.screenHeight,
-            nameColor: "#ffffff",
+            nameColor: "#FFFFFF",
         }
         list.animv.add(list.renderv);
         return list;
@@ -393,7 +448,7 @@ const global = {
             global.showTree = true;
             global.pullUpgradeMenu = true;
             global.pullSkillBar = true;
-            global.socket.talk('T');
+            global.socket.talk("T");
         } else if (type === "exit") {
             global.showTree = false;
             global.renderTankTree = false;
@@ -404,16 +459,18 @@ const global = {
             global.scrollVelocityY = global.scrollVelocityX = 0;
             global.classTreeDrag.isDragging = false;
             global.classTreeDrag.momentum = { x: 0, y: 0 };
-            global.searchQuery = '';
+            global.searchQuery = "";
             global.searchBarActive = false;
             global.canvas.tankTreeProps.enabled = false;
         }
     },
     exit: () => { // When exiting and going back to the menu, reset things.
         document.getElementById("gameAreaWrapper").style.display = "none";
-        global.socket && global.socket.close();
         document.getElementById("startMenuWrapper").style.display = "block";
-        global.player = global.initPlayer();
+        clearInterval(global.socket.commandCycle);
+        clearInterval(global.socketMotionCycle);
+        global.socket.open = false;
+        global.socket && global.socket.close();
         global.gameLoading = false;
         global.gameStart = false;
         global.gameUpdate = false;
@@ -434,10 +491,10 @@ const global = {
         global.canvas.mouseMoved = false;
         global.mockups = [];
         global.mobile && document.exitFullscreen();
-        clearInterval(global.socketMotionCycle);
         global.resetTarget();
-        global.clearUpgrades();
         global.resetSocket();
+        global.clearUpgrades(true);
+        global.player = global.initPlayer();
         setTimeout(() => {
             document.getElementById("startMenuWrapper").style.top = "0px";
         }, 10);

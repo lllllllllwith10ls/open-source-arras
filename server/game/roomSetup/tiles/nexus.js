@@ -9,9 +9,9 @@ tileClass.nexus = new Tile({
                 entity.nexus_alerted = true;
                 setTimeout(() => entity.nexus_alerted = false, 50);
                 let dx = entity.x - tile.loc.x,
-                dy = entity.y - tile.loc.y,
-                dist2 = dx ** 2 + dy ** 2,
-                force = 0.3;
+                    dy = entity.y - tile.loc.y,
+                    dist2 = dx ** 2 + dy ** 2,
+                    force = 0.3;
                 entity.accel.x += (((3e4 * dx) / dist2) * force);
                 entity.accel.y += (((3e4 * dy) / dist2) * force);
             }
@@ -22,7 +22,7 @@ tileClass.nexus_portal_tile = new Tile({
     COLOR: "white",
     NAME: "Portal tile",
     DATA: {
-        has_portal: false,
+        has_portal: false
     },
     INIT: (tile, room) => {
         if (!room.portalTiles) room.portalTiles = [];

@@ -9,7 +9,7 @@ async function getServer(server) {
             ip: server.ip,
             destination: `${server.ip.startsWith("localhost") ? "http://" : "https://"}${data.ip}`
         };
-    } catch (e) {
+    } catch(e) {
         console.log(e);
     }
 }
@@ -23,7 +23,7 @@ let Portal = class {
         this.ip = ip;
         this.body = null;
     }
-    spawn(loc, color = "#ffffff", duration) {
+    spawn(loc, color = "#FFFFFF", duration) {
         if (loc.data) loc.data.has_portal = true;
         this.body = new Entity(loc.data ? loc.randomInside() : loc);
         this.body.define("serverPortal");
@@ -38,7 +38,7 @@ let Portal = class {
         this.body.allowedOnMinimap = true;
         this.body.alwaysShowOnMinimap = true;
         this.body.minimapColor = 19;
-        let updateInterval = setInterval(async () => {
+        let updateInterval = setInterval(async() => {
             let data = await getServer({ip: this.ip});
             if (data) {
                 this.body.settings.scoreLabel = `${data.players} player${data.players === 1 ? "" : "s"}`;

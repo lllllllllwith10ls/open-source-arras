@@ -14,7 +14,7 @@ class bulletEntity { // Basically an (Entity) but with heavy limitations to impr
             main: false,
             alt: false,
             fire: false,
-            power: 0,
+            power: 0
         };
         this.isInGrid = false;
         this.removeFromGrid = () => {
@@ -31,11 +31,12 @@ class bulletEntity { // Basically an (Entity) but with heavy limitations to impr
         this.controllers = [];
         // Initalize
         this.skill = new Skill();
-        this.health = new HealthType(1, 'static', 0);
-        this.shield = new HealthType(0, 'dynamic');
+        this.health = new HealthType(1, "static", 0);
+        this.shield = new HealthType(0, "dynamic");
         this.x = position.x;
         this.y = position.y;
         this.settings = {};
+        this.globalStore = {};
         this.aiSettings = {};
         this.guns = new Map();
         this.children = [];
@@ -86,7 +87,9 @@ class bulletEntity { // Basically an (Entity) but with heavy limitations to impr
         for (let v of global.gameManager.views) v.add(this);
     }
 
-    life() { bringToLife(this) };
+    life() {
+        bringToLife(this) 
+    };
 
     addController(newIO) {
         if (!Array.isArray(newIO)) newIO = [newIO];
@@ -155,7 +158,7 @@ class bulletEntity { // Basically an (Entity) but with heavy limitations to impr
                     addedSuccess = true;
                 }
                 this.addController(toAdd);
-            } catch (e) {
+            } catch(e) {
                 console.error(addedSuccess ? `Controller ${set.CONTROLLERS} ran into an error!` : `Controller "${set.CONTROLLERS}" was attempted to be gotten but does not exist!`);
                 throw new Error(e);
             }
@@ -348,12 +351,16 @@ class bulletEntity { // Basically an (Entity) but with heavy limitations to impr
 
     updateBodyInfo() {};
 
-    move() { global.runMove(this) };
-    face() { global.runFace(this) };
+    move() {
+        global.runMove(this) 
+    };
+    face() {
+        global.runFace(this) 
+    };
 
     damageMultiplier() {
         switch (this.type) {
-            case 'swarm': return 0.25 + 1.5 * util.clamp(this.range / (this.RANGE + 1), 0, 1);
+            case "swarm": return 0.25 + 1.5 * util.clamp(this.range / (this.RANGE + 1), 0, 1);
             default: return 1;
         }
     }
@@ -377,7 +384,7 @@ class bulletEntity { // Basically an (Entity) but with heavy limitations to impr
             layer: this.layerID ? this.layerID : this.type === "wall" ? 11 : this.type === "food" ? 10 : this.type === "tank" ? 5 : this.type === "crasher" ? 1 : 0,
             color: this.color.compiled,
             guns: Array.from(this.guns.values()).map(gun => gun.getPhotoInfo()),
-            turrets: [],
+            turrets: []
         };
     };
 
@@ -388,7 +395,7 @@ class bulletEntity { // Basically an (Entity) but with heavy limitations to impr
 
     physics() {
         if (this.accel.x == null || this.velocity.x == null) {
-            util.error('Void Error!');
+            util.error("Void Error!");
             util.error(this.collisionArray);
             util.error(this.label);
             util.error(this);
@@ -420,7 +427,7 @@ class bulletEntity { // Basically an (Entity) but with heavy limitations to impr
 
     confinementToTheseEarthlyShackles() {
         if (this.x == null || this.x == null) {
-            util.error('Void Error!');
+            util.error("Void Error!");
             util.error(this.collisionArray);
             util.error(this.label);
             util.error(this);
@@ -429,11 +436,11 @@ class bulletEntity { // Basically an (Entity) but with heavy limitations to impr
             return 0;
         }
         if (!this.settings.canGoOutsideRoom) {
-            if (Config.arena_shape === "circle") {
+            if (Config.round_arena) {
                 let centerPoint = {
-                    x: global.gameManager.room.width - global.gameManager.room.width,
-                    y: global.gameManager.room.height - global.gameManager.room.height,
-                }, dist = util.getDistance(this, centerPoint);
+                        x: global.gameManager.room.width - global.gameManager.room.width,
+                        y: global.gameManager.room.height - global.gameManager.room.height
+                    }, dist = util.getDistance(this, centerPoint);
                 if (dist > global.gameManager.room.width - global.gameManager.room.width / 2) {
                     let strength = (dist - global.gameManager.room.width / 2) * Config.room_bound_force / (Config.run_speed * 350);
                     this.x = util.lerp(this.x, centerPoint.x, strength);
@@ -496,7 +503,7 @@ class bulletEntity { // Basically an (Entity) but with heavy limitations to impr
     };
 
     destroy() {
-        // Remove this from views
+    // Remove this from views
         global.gameManager.views.forEach(v => v.remove(this));
         // Remove from bullet lists if needed
         if (this.bulletparent != null) {
@@ -541,7 +548,9 @@ class bulletEntity { // Basically an (Entity) but with heavy limitations to impr
         targetableEntities.delete(this.id);
     }
 
-    isDead() { return this.health.amount <= 0; };
+    isDead() {
+        return this.health.amount <= 0; 
+    };
     emit() {} // Placeholder
 }
 
